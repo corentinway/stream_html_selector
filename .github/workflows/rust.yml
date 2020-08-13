@@ -20,7 +20,14 @@ jobs:
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+    - name: rust-grcov
+      uses: actions-rs/grcov@0.1.5
     - uses: actions-rs/clippy-check@v1.0.7
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
+    - name: rust-audit-check
+      uses: actions-rs/audit-check@v1.2.0
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
  
