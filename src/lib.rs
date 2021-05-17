@@ -1,4 +1,5 @@
 mod tag;
+mod tag_parser;
 
 #[derive(PartialEq)]
 enum PathUpdateState {
