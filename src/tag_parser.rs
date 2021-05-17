@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use std::cmp::PartialEq;
+use std::collections::HashMap;
 
 #[derive(Debug)]
 struct TagParser {
@@ -10,95 +10,98 @@ struct TagParser {
 
 #[derive(PartialEq, Debug)]
 enum ReadingState {
-    START,
-    READING_ATTRIBUTE_NAME,
-    WAIT_FOR_EQUALS,
-    WAIT_FOR_ATTRIBUTE_VALUE,
-    READING_ATTRIBUTE_VALUE,
+    Start,
+    ReadingAttributeName,
+    WaitForEquals,
+    WaitForAttributeValue,
+    ReadingAttributeValue,
 }
 
 impl TagParser {
-
     pub fn new() -> Self {
-        TagParser{
+        TagParser {
             attribute_name_tmp: String::new(),
             attribute_value_tmp: String::new(),
-            state: ReadingState::START,
+            state: ReadingState::Start,
         }
     }
 
     // TODO clean tmp values
 
-    pub fn parse_attributes(&mut self, html : &str) -> HashMap<String, String> {
+    pub fn parse_attributes(&mut self, html: &str) -> HashMap<String, String> {
         let mut attributes = HashMap::new();
 
         use ReadingState::*;
 
-        html.chars()
-            .for_each(|c| {
+        html.chars().for_each(|c| {
+            println!("c = {:?}, parser = {:?}", c, self);
 
-                println!("c = {:?}, parser = {:?}", c, self);
-
-                if is_attribute_name(&c) && (self.state == START || self.state == READING_ATTRIBUTE_NAME) {
-                    self.attribute_name_tmp.push(c);
-                    self.state = READING_ATTRIBUTE_NAME;
-                } else if is_attribute_name(&c) && self.state == READING_ATTRIBUTE_NAME {
-                    self.attribute_name_tmp.push(c);
-                } else if c == '=' && (self.state == READING_ATTRIBUTE_NAME || self.state == WAIT_FOR_EQUALS )  {
-                    self.state = WAIT_FOR_ATTRIBUTE_VALUE;
-                } else if is_quote(&c) && self.state == WAIT_FOR_ATTRIBUTE_VALUE {
-                    // next is the value
-                    self.state = READING_ATTRIBUTE_VALUE;
-                } else if !is_quote(&c) && self.state == READING_ATTRIBUTE_VALUE {
-                    self.attribute_value_tmp.push(c);
-                } else if self.is_last_quote_ending_reading_attribute_value(&c) {
-                    // end of attributes reading
-                    // 1. storing
-                    attributes.insert(self.attribute_name_tmp.clone(), self.attribute_value_tmp.clone());
-                    // 2. cleaning
-                    self.attribute_name_tmp = String::new();
-                    self.attribute_value_tmp = String::new();
-                    // 3. init state
-                    self.state = START;
-                } else if c.is_whitespace() && self.state == READING_ATTRIBUTE_NAME {
-                    self.state = WAIT_FOR_EQUALS
-                } else if is_attribute_name(&c) && self.state == WAIT_FOR_EQUALS {
-                    // end of attributes reading
-                    // 1. storing
-                    attributes.insert(self.attribute_name_tmp.clone(), String::from("true"));
-                    // 2. cleaning
-                    self.attribute_name_tmp = String::new();
-                    self.attribute_value_tmp = String::new();
-                    // 3. init state
-                    self.state = START;
-                    self.attribute_name_tmp.push(c);
-                }
-
-                
-            });
-
-            // if it has attribute name without a value, then store the attribute with a true value
-            if self.attribute_name_tmp.len() > 0 && self.attribute_value_tmp.is_empty() 
-                && (self.state == READING_ATTRIBUTE_NAME || self.state == WAIT_FOR_EQUALS) {
-                // 1. storing 
+            if is_attribute_name(&c) && (self.state == Start || self.state == ReadingAttributeName)
+            {
+                self.attribute_name_tmp.push(c);
+                self.state = ReadingAttributeName;
+            } else if is_attribute_name(&c) && self.state == ReadingAttributeName {
+                self.attribute_name_tmp.push(c);
+            } else if c == '='
+                && (self.state == ReadingAttributeName || self.state == WaitForEquals)
+            {
+                self.state = WaitForAttributeValue;
+            } else if is_quote(&c) && self.state == WaitForAttributeValue {
+                // next is the value
+                self.state = ReadingAttributeValue;
+            } else if !is_quote(&c) && self.state == ReadingAttributeValue {
+                self.attribute_value_tmp.push(c);
+            } else if self.is_last_quote_ending_reading_attribute_value(&c) {
+                // end of attributes reading
+                // 1. storing
+                attributes.insert(
+                    self.attribute_name_tmp.clone(),
+                    self.attribute_value_tmp.clone(),
+                );
+                // 2. cleaning
+                self.attribute_name_tmp = String::new();
+                self.attribute_value_tmp = String::new();
+                // 3. init state
+                self.state = Start;
+            } else if c.is_whitespace() && self.state == ReadingAttributeName {
+                self.state = WaitForEquals
+            } else if is_attribute_name(&c) && self.state == WaitForEquals {
+                // end of attributes reading
+                // 1. storing
                 attributes.insert(self.attribute_name_tmp.clone(), String::from("true"));
                 // 2. cleaning
                 self.attribute_name_tmp = String::new();
                 self.attribute_value_tmp = String::new();
+                // 3. init state
+                self.state = Start;
+                self.attribute_name_tmp.push(c);
             }
+        });
+
+        // if it has attribute name without a value, then store the attribute with a true value
+        if self.attribute_name_tmp.len() > 0
+            && self.attribute_value_tmp.is_empty()
+            && (self.state == ReadingAttributeName || self.state == WaitForEquals)
+        {
+            // 1. storing
+            attributes.insert(self.attribute_name_tmp.clone(), String::from("true"));
+            // 2. cleaning
+            self.attribute_name_tmp = String::new();
+            self.attribute_value_tmp = String::new();
+        }
 
         attributes
     }
 
-    fn is_last_quote_ending_reading_attribute_value(&self, c : &char ) -> bool {
-        is_quote(&c) && self.state == ReadingState::READING_ATTRIBUTE_VALUE
+    fn is_last_quote_ending_reading_attribute_value(&self, c: &char) -> bool {
+        is_quote(&c) && self.state == ReadingState::ReadingAttributeValue
     }
 }
 
-fn is_attribute_name(c :&char) -> bool {
+fn is_attribute_name(c: &char) -> bool {
     c.is_alphanumeric() || *c == '-'
 }
-fn is_quote(c :&char) -> bool {
+fn is_quote(c: &char) -> bool {
     *c == '"' || *c == '\''
 }
 
@@ -107,7 +110,7 @@ mod tag_parser_test {
 
     use super::*;
 
-    #[test] 
+    #[test]
     fn should_return_empty_attributes_map_given_empty_str() {
         let html = "";
         let mut parser = TagParser::new();

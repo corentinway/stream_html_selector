@@ -65,7 +65,6 @@ impl HtmlSelector {
                         if updated == NewTagToDelete {
                             self.reduce_path();
                         }
-
                     }
                     tag = String::new();
                 }
@@ -78,9 +77,9 @@ impl HtmlSelector {
         if self.tag_path.len() == 1 {
             self.tag_path_string.ends_with(request)
         } else {
-            self.tag_path_string.ends_with(format!(" {}", request).as_str())
+            self.tag_path_string
+                .ends_with(format!(" {}", request).as_str())
         }
-        
     }
 
     fn reduce_path(&mut self) {
@@ -88,7 +87,7 @@ impl HtmlSelector {
         self.tag_path_string = self.tag_path.join(" ");
     }
 
-    fn increase_path(&mut self, tag_name : String ) {
+    fn increase_path(&mut self, tag_name: String) {
         self.tag_path.push(tag_name);
         self.tag_path_string = self.tag_path.join(" ");
     }
@@ -101,7 +100,7 @@ impl HtmlSelector {
             // end of tag
             self.reduce_path();
         } else if word.ends_with("/>") {
-            // put the tag, 
+            // put the tag,
             let tag_name = tag::extract_tag_name(word);
             self.increase_path(tag_name);
             // search for css request
