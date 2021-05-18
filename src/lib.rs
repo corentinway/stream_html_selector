@@ -33,7 +33,7 @@ impl HtmlSelector {
         }
     }
 
-    pub fn count(&mut self, html: &String, css_requests: &Vec<&str>) -> Vec<usize> {
+    pub fn count(&mut self, html: &str, css_requests: &Vec<&str>) -> Vec<usize> {
         let mut counts = vec![0; css_requests.len()];
 
         let mut tag = String::new();
@@ -54,13 +54,13 @@ impl HtmlSelector {
 
                     if updated == TagAdded || updated == NewTagToDelete {
                         css_requests
-                            .into_iter()
+                            .iter()
                             .enumerate()
                             .for_each(|(index, request)| {
                                 //println!("word : {:?} request {:?}", word, request);
 
                                 if self.match_request(request) {
-                                    counts[index] = counts[index] + 1;
+                                    counts[index] += 1;
                                 }
                             });
                         if updated == NewTagToDelete {

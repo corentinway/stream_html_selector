@@ -10,12 +10,12 @@ pub struct Tag {
 
 pub fn extract_tag_name(html: &str) -> Tag {
     // remote '<' and '>'
-    let start = html.find("<").unwrap();
+    let start = html.find('<').unwrap();
     let mut tag_name = html.get(start + 1..).unwrap();
 
     let mut end = tag_name
         .find("/>")
-        .unwrap_or(tag_name.find(">").unwrap_or(tag_name.len()));
+        .unwrap_or(tag_name.find('>').unwrap_or(tag_name.len()));
 
     tag_name = tag_name.get(0..end).unwrap();
 
@@ -24,15 +24,15 @@ pub fn extract_tag_name(html: &str) -> Tag {
         .replace("\n", " ")
         .replace("\r", " ");
 
-    let start_attributes_index = tag_name.find(" ").unwrap_or(1);
+    let start_attributes_index = tag_name.find(' ').unwrap_or(1);
     let end_attributes_index = tag_name.len();
 
     let attributes_code = tag_name.get(start_attributes_index..end_attributes_index).unwrap_or_default();
     let mut tag_parser = TagParser::new();
-    let mut attributes = tag_parser.parse_attributes(attributes_code);
+    let attributes = tag_parser.parse_attributes(attributes_code);
 
     // remove spaces
-    end = tag_name.find(" ").unwrap_or(tag_name.len());
+    end = tag_name.find(' ').unwrap_or_else(||tag_name.len());
 
     tag_name = tag_name.get(0..end).unwrap().to_string();
 
@@ -48,7 +48,7 @@ pub fn extract_tag_name(html: &str) -> Tag {
 
 
 fn parse_classes(classes_str: &str) -> Option<Vec<String>> {
-    let classes : Vec<String> = classes_str.split(" ")
+    let classes : Vec<String> = classes_str.split(' ')
         .filter( |class| !class.is_empty())
         .map( |class| class.to_string())
         .collect();
