@@ -2,7 +2,7 @@ use std::cmp::PartialEq;
 use std::collections::HashMap;
 
 #[derive(Debug)]
-struct TagParser {
+pub struct TagParser {
     attribute_name_tmp: String,
     attribute_value_tmp: String,
     state: ReadingState,
@@ -34,7 +34,7 @@ impl TagParser {
         use ReadingState::*;
 
         html.chars().for_each(|c| {
-            println!("c = {:?}, parser = {:?}", c, self);
+            //println!("c = {:?}, parser = {:?}", c, self);
 
             if is_attribute_name(&c) && (self.state == Start || self.state == ReadingAttributeName)
             {
