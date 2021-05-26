@@ -1,10 +1,14 @@
 use std::cmp::PartialEq;
 use std::collections::HashMap;
 
+/// represent the state when parsing elements inside an HTML tag
 #[derive(Debug)]
 pub struct TagParser {
+    /// temporary content for the attribute name
     attribute_name_tmp: String,
+    /// temporary content for the attribute value
     attribute_value_tmp: String,
+    /// state when reading the content of an HTML tag
     state: ReadingState,
 }
 

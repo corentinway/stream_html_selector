@@ -3,10 +3,17 @@ use super::tag_parser::TagParser;
 
 pub struct Tag {
     pub name: String,
-    attributes: HashMap<String, String>,
+    pub attributes: HashMap<String, String>,
 }
 
- 
+impl Tag {
+    pub fn id(&self) -> Option<&String> {
+        self.attributes.get("id")
+    }
+    pub fn classes(&self) -> Option<&String> {
+        self.attributes.get("class")
+    }
+} 
 
 pub fn extract_tag_name(html: &str) -> Tag {
     // remote '<' and '>'
@@ -41,10 +48,6 @@ pub fn extract_tag_name(html: &str) -> Tag {
         attributes: attributes,
     }
 }
-
-
-
-
 
 
 #[cfg(test)]
