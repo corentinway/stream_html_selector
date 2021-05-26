@@ -12,16 +12,25 @@ pub struct TagParser {
     state: ReadingState,
 }
 
+/// state of the parser when reading inside an HTML tag
 #[derive(PartialEq, Debug)]
 enum ReadingState {
+    /// First state and initial state when before reading a (new) attribute.
     Start,
+    /// The parser is reading the attribute name.
     ReadingAttributeName,
+    /// The parser had finished to read the attribute name and is expecting equals characters.
+    /// This state is useful when the `=` character has white spaces before
     WaitForEquals,
+    /// The parser found the `=` character and expect to read the attribute value.
     WaitForAttributeValue,
+    /// The parser is reading the attribute value.
     ReadingAttributeValue,
 }
 
+/// implementation of a tag parser
 impl TagParser {
+    /// initialize the parser
     pub fn new() -> Self {
         TagParser {
             attribute_name_tmp: String::new(),
@@ -30,8 +39,7 @@ impl TagParser {
         }
     }
 
-    // TODO clean tmp values
-
+    /// Parse all attributes after the tag name. It read attributes character by character.
     pub fn parse_attributes(&mut self, html: &str) -> HashMap<String, String> {
         let mut attributes = HashMap::new();
 
@@ -63,10 +71,7 @@ impl TagParser {
                     self.attribute_value_tmp.clone(),
                 );
                 // 2. cleaning
-                self.attribute_name_tmp = String::new();
-                self.attribute_value_tmp = String::new();
-                // 3. init state
-                self.state = Start;
+                self.re_initialise_state();
             } else if c.is_whitespace() && self.state == ReadingAttributeName {
                 self.state = WaitForEquals
             } else if is_attribute_name(&c) && self.state == WaitForEquals {
@@ -74,10 +79,8 @@ impl TagParser {
                 // 1. storing
                 attributes.insert(self.attribute_name_tmp.clone(), String::from("true"));
                 // 2. cleaning
-                self.attribute_name_tmp = String::new();
-                self.attribute_value_tmp = String::new();
+                self.re_initialise_state();
                 // 3. init state
-                self.state = Start;
                 self.attribute_name_tmp.push(c);
             }
         });
@@ -90,11 +93,18 @@ impl TagParser {
             // 1. storing
             attributes.insert(self.attribute_name_tmp.clone(), String::from("true"));
             // 2. cleaning
-            self.attribute_name_tmp = String::new();
-            self.attribute_value_tmp = String::new();
+            self.re_initialise_state();
         }
 
         attributes
+    }
+
+    /// Initialise the parser in order to read the next attribute.
+    /// It cleans tmp variables and re-initialize the parser state
+    fn re_initialise_state(&mut self) {
+        self.attribute_name_tmp = String::new();
+        self.attribute_value_tmp = String::new();
+        self.state = ReadingState::Start;
     }
 
     fn is_last_quote_ending_reading_attribute_value(&self, c: &char) -> bool {
@@ -102,9 +112,11 @@ impl TagParser {
     }
 }
 
+/// Returns true in the case the letter belongs to the allowed letter for attribute names.
 fn is_attribute_name(c: &char) -> bool {
     c.is_alphanumeric() || *c == '-'
 }
+/// Returns true if the character is `"` or a `'`.
 fn is_quote(c: &char) -> bool {
     *c == '"' || *c == '\''
 }

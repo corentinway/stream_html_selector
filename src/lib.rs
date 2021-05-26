@@ -3,6 +3,7 @@ mod tag_parser;
 mod selector;
 mod html_selector;
 
+/// tmp implementation in order to reduce dead code warning messages
 pub fn parse(html : &str) -> tag::Tag {
     tag::extract_tag_name(html)   
 }
