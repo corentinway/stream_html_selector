@@ -47,16 +47,6 @@ pub fn extract_tag_name(html: &str) -> Tag {
 
 
 
-fn parse_classes(classes_str: &str) -> Option<Vec<String>> {
-    let classes : Vec<String> = classes_str.split(' ')
-        .filter( |class| !class.is_empty())
-        .map( |class| class.to_string())
-        .collect();
-    Some(classes)
-}
-
-
-
 #[cfg(test)]
 mod tests {
 
