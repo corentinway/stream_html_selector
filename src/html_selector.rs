@@ -31,7 +31,7 @@ impl HtmlSelector {
         }
     }
 
-    pub fn count(&mut self, html: &str, css_requests: &Vec<&str>) -> Vec<usize> {
+    pub fn count(&mut self, html: &str, css_requests: &[&str]) -> Vec<usize> {
         let mut counts = vec![0; css_requests.len()];
 
         let mut tag = String::new();
@@ -91,7 +91,7 @@ impl HtmlSelector {
         self.tag_path_string = self.tag_path.join(" ");
     }
 
-    fn update_tag_path(&mut self, word: &String) -> PathUpdateState {
+    fn update_tag_path(&mut self, word: &str) -> PathUpdateState {
         let mut updated = TagDeleted;
         //println!("   WORD = {:?}", word);
 
@@ -99,7 +99,7 @@ impl HtmlSelector {
             // end of tag
             self.reduce_path();
         } else if word.ends_with("/>") {
-            // put the tag, 
+            // put the tag,
             let tag = tag::extract_tag_name(word);
             self.increase_path(tag.name);
             // search for css request

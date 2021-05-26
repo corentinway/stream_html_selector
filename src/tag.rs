@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use super::tag_parser::TagParser;
+use std::collections::HashMap;
 
 /// hold elements of an HTML tag
 pub struct Tag {
@@ -19,16 +19,15 @@ impl Tag {
     pub fn classes(&self) -> Option<&String> {
         self.attributes.get("class")
     }
-} 
+}
 /// Parse an starting HTML tag like `<div id'foo' class="bar" hidden aria-label='baz'>`
 pub fn extract_tag_name(html: &str) -> Tag {
-    
     let start = html.find('<').unwrap();
     let mut tag_name = html.get(start + 1..).unwrap();
 
     let mut end = tag_name
         .find("/>")
-        .unwrap_or(tag_name.find('>').unwrap_or(tag_name.len()));
+        .unwrap_or_else(|| tag_name.find('>').unwrap_or_else(|| tag_name.len()));
 
     tag_name = tag_name.get(0..end).unwrap();
 
@@ -40,21 +39,22 @@ pub fn extract_tag_name(html: &str) -> Tag {
     let start_attributes_index = tag_name.find(' ').unwrap_or(1);
     let end_attributes_index = tag_name.len();
 
-    let attributes_code = tag_name.get(start_attributes_index..end_attributes_index).unwrap_or_default();
+    let attributes_code = tag_name
+        .get(start_attributes_index..end_attributes_index)
+        .unwrap_or_default();
     let mut tag_parser = TagParser::new();
     let attributes = tag_parser.parse_attributes(attributes_code);
 
     // remove spaces
-    end = tag_name.find(' ').unwrap_or_else(||tag_name.len());
+    end = tag_name.find(' ').unwrap_or_else(|| tag_name.len());
 
     tag_name = tag_name.get(0..end).unwrap().to_string();
 
     Tag {
-        name : tag_name,
+        name: tag_name,
         attributes,
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -84,7 +84,6 @@ mod tests {
         assert_eq!("div", tag.name);
         assert_eq!("foo", tag.attributes.get("id").unwrap());
 
-
         let html = "<div  id=\"foo\" >";
         let tag = extract_tag_name(html);
         assert_eq!("div", tag.name);
@@ -109,10 +108,11 @@ mod tests {
         let tag = extract_tag_name(html);
         assert_eq!("div", tag.name);
         assert!(tag.attributes.get("class").is_some());
-        assert_eq!(Some(&String::from("bar   baz   foo mun")), 
-            tag.attributes.get("class"));
+        assert_eq!(
+            Some(&String::from("bar   baz   foo mun")),
+            tag.attributes.get("class")
+        );
     }
-
 
     #[test]
     fn should_extract_consider_id_and_class_as_attributes() {
@@ -123,7 +123,7 @@ mod tests {
         assert_eq!("foo", tag.attributes.get("id").unwrap());
         assert_eq!("bar", tag.attributes.get("class").unwrap());
     }
-    
+
     #[test]
     fn should_extract_ignore_id_and_class_as_attributes_and_read_one() {
         let html = "<input id='foo' class='bar' type='password'>";
@@ -131,8 +131,6 @@ mod tests {
         assert!(!tag.attributes.is_empty());
         println!("attributes {:?}", tag.attributes);
         assert_eq!(3, tag.attributes.len());
-
-
     }
 
     #[test]

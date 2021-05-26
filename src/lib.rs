@@ -1,14 +1,14 @@
+mod html_selector;
+mod selector;
 mod tag;
 mod tag_parser;
-mod selector;
-mod html_selector;
 
 /// tmp implementation in order to reduce dead code warning messages
-pub fn parse(html : &str) -> tag::Tag {
-    tag::extract_tag_name(html)   
+pub fn parse(html: &str) -> tag::Tag {
+    tag::extract_tag_name(html)
 }
 
-#[cfg(test)] 
+#[cfg(test)]
 mod test {
     use super::parse;
 

@@ -86,7 +86,7 @@ impl TagParser {
         });
 
         // if it has attribute name without a value, then store the attribute with a true value
-        if self.attribute_name_tmp.len() > 0
+        if !self.attribute_name_tmp.is_empty()
             && self.attribute_value_tmp.is_empty()
             && (self.state == ReadingAttributeName || self.state == WaitForEquals)
         {
