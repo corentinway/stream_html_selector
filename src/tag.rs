@@ -1,22 +1,28 @@
 use std::collections::HashMap;
 use super::tag_parser::TagParser;
 
+/// hold elements of an HTML tag
 pub struct Tag {
+    /// tag name
     pub name: String,
+    /// attributes map : attributes name -> attributes value
     pub attributes: HashMap<String, String>,
 }
 
 impl Tag {
+    /// Get the tag id from the attributes
     pub fn id(&self) -> Option<&String> {
         self.attributes.get("id")
     }
+    /// Get the tag class from the attributes. It is the class bulk value : a
+    /// string where each classes are separated by spaces, like in HTML code.
     pub fn classes(&self) -> Option<&String> {
         self.attributes.get("class")
     }
 } 
-
+/// Parse an starting HTML tag like `<div id'foo' class="bar" hidden aria-label='baz'>`
 pub fn extract_tag_name(html: &str) -> Tag {
-    // remote '<' and '>'
+    
     let start = html.find('<').unwrap();
     let mut tag_name = html.get(start + 1..).unwrap();
 
@@ -45,7 +51,7 @@ pub fn extract_tag_name(html: &str) -> Tag {
 
     Tag {
         name : tag_name,
-        attributes: attributes,
+        attributes,
     }
 }
 
