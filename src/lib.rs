@@ -1,6 +1,7 @@
 mod html_selector;
 mod selector;
 mod tag;
+mod tag_iterator;
 mod tag_parser;
 
 /// tmp implementation in order to reduce dead code warning messages
