@@ -26,7 +26,7 @@ impl Tag {
 /// Parse an starting HTML tag like `<div id'foo' class="bar" hidden aria-label='baz'>`
 pub fn extract_tag_name(html: &str) -> Tag {
     let start = html.find('<').unwrap();
-    
+
     let end_opt = html.find("/>");
     let is_autoclosing_tag = end_opt.is_some();
 
@@ -52,23 +52,19 @@ pub fn extract_tag_name(html: &str) -> Tag {
     let attributes = if start_attributes_index.is_some() {
         let start_attributes_index = start_attributes_index.unwrap();
         let attributes_code = tag_content
-        .get(start_attributes_index..end_attributes_index)
-        .unwrap_or_default();
+            .get(start_attributes_index..end_attributes_index)
+            .unwrap_or_default();
         let mut tag_parser = TagParser::new();
         tag_parser.parse_attributes(attributes_code)
     } else {
         HashMap::new()
     };
-    
 
-    let offset = if is_autoclosing_tag {
-        2
-    } else {
-        1
-    };
+    let offset = if is_autoclosing_tag { 2 } else { 1 };
 
     let name = tag_content
-        .find(" ").and_then(|position| tag_content.get(0..position));
+        .find(" ")
+        .and_then(|position| tag_content.get(0..position));
 
     let name = if name.is_some() {
         name.unwrap().to_string()
@@ -81,6 +77,24 @@ pub fn extract_tag_name(html: &str) -> Tag {
         attributes,
         length: end - start + offset,
     }
+}
+
+/// Parse an starting HTML tag like `<div id'foo' class="bar" hidden aria-label='baz'>`
+pub fn extract_end_tag_name(html: &str) -> (String, usize) {
+    let start = 2;
+
+    let end = html.find(">").unwrap();
+
+    let tag_content = html.get(start..end).unwrap();
+
+    let tag_content: String = tag_content
+        .replace("\n\r", "")
+        .replace("\n", "")
+        .replace("\r", "");
+
+    let name = tag_content.to_string();
+    let length = name.len() + 3;
+    (name, length)
 }
 
 #[cfg(test)]
