@@ -49,23 +49,6 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
         return None;
     };
 
-
-// -------------
-    /*
-    let end = if end_autoclosing.is_some() {
-        end_autoclosing.unwrap()
-    } else {
-        html.find(">").unwrap_or_else(|| html.len())
-    };
-    */
-
-// --------------
-
-
-
-
-    //let mut tag_name = html.get(start + 1..).unwrap();
-
     let tag_content = html.get(start + 1..end).unwrap();
 
     let tag_content: String = tag_content
@@ -109,9 +92,14 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
 
 /// Parse an starting HTML tag like `<div id'foo' class="bar" hidden aria-label='baz'>`
 pub fn extract_end_tag_name(html: &str) -> (String, usize) {
-    let start = 2;
+    extract_element_like(html, "</", ">")
+}
 
-    let end = html.find(">").unwrap();
+
+fn extract_element_like(html: &str, start_str: &str, end_str: &str) -> (String, usize) {
+    let start = start_str.len();
+
+    let end = html.find(end_str).unwrap();
 
     let tag_content = html.get(start..end).unwrap();
 
@@ -121,9 +109,12 @@ pub fn extract_end_tag_name(html: &str) -> (String, usize) {
         .replace("\r", "");
 
     let name = tag_content.to_string();
-    let length = name.len() + 3;
+    let length = name.len() + start + end_str.len();
     (name, length)
 }
+
+
+
 
 #[cfg(test)]
 mod tests {
