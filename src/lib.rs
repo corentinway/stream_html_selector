@@ -6,7 +6,7 @@ mod tag_parser;
 
 /// tmp implementation in order to reduce dead code warning messages
 pub fn parse(html: &str) -> tag::Tag {
-    tag::extract_tag_name(html)
+    tag::extract_tag_name(html).unwrap()
 }
 
 #[cfg(test)]

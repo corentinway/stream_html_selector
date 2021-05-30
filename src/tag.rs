@@ -1,5 +1,6 @@
 use super::tag_parser::TagParser;
 use std::collections::HashMap;
+use std::cmp;
 
 /// hold elements of an HTML tag
 #[derive(PartialEq, Debug)]
@@ -24,17 +25,44 @@ impl Tag {
     }
 }
 /// Parse an starting HTML tag like `<div id'foo' class="bar" hidden aria-label='baz'>`
-pub fn extract_tag_name(html: &str) -> Tag {
+pub fn extract_tag_name(html: &str) -> Option<Tag> {
     let start = html.find('<').unwrap();
 
-    let end_opt = html.find("/>");
-    let is_autoclosing_tag = end_opt.is_some();
+    let end_autoclosing = html.find("/>");
+    let mut is_autoclosing_tag = end_autoclosing.is_some(); // FIXME
 
-    let end = if end_opt.is_some() {
-        end_opt.unwrap()
+    let end_closing = html.find(">");
+
+
+    let end = if end_autoclosing.is_some() && end_closing.is_some() {
+        //      >      before  />
+        // or   />     before   >
+        let end_autoclosing = end_autoclosing.unwrap();
+        let end_closing = end_closing.unwrap();
+        is_autoclosing_tag = end_autoclosing < end_closing;
+        cmp::min(end_autoclosing, end_closing)
+    } else if end_autoclosing.is_some() && end_closing.is_none() {
+        end_autoclosing.unwrap()
+    } else if end_autoclosing.is_none() && end_closing.is_some() {
+        end_closing.unwrap()
+    } else {
+        return None;
+    };
+
+
+// -------------
+    /*
+    let end = if end_autoclosing.is_some() {
+        end_autoclosing.unwrap()
     } else {
         html.find(">").unwrap_or_else(|| html.len())
     };
+    */
+
+// --------------
+
+
+
 
     //let mut tag_name = html.get(start + 1..).unwrap();
 
@@ -72,11 +100,11 @@ pub fn extract_tag_name(html: &str) -> Tag {
         tag_content
     };
 
-    Tag {
-        name: name,
+    Some(Tag {
+        name,
         attributes,
         length: end - start + offset,
-    }
+    })
 }
 
 /// Parse an starting HTML tag like `<div id'foo' class="bar" hidden aria-label='baz'>`
@@ -105,38 +133,38 @@ mod tests {
     #[test]
     fn should_extract_tag_name_from_tiny_tag() {
         let html = "<div>";
-        let tag = extract_tag_name(html);
+        let tag = extract_tag_name(html).unwrap();
         assert_eq!("div", tag.name);
         assert!(tag.attributes.is_empty());
         assert_eq!(5, tag.length);
     }
     #[test]
     fn should_extract_tag_name_from_tiny_tag_starting_with_blank() {
-        let tag = extract_tag_name("   <div>");
+        let tag = extract_tag_name("   <div>").unwrap();
         assert_eq!("div", tag.name);
         assert_eq!(5, tag.length);
     }
     #[test]
     fn should_extract_tag_name_from_tiny_tag_ending_with_blank() {
-        let tag = extract_tag_name("<div>    ");
+        let tag = extract_tag_name("<div>    ").unwrap();
         assert_eq!("div", tag.name);
         assert_eq!(5, tag.length);
     }
     #[test]
     fn should_extract_tag_name_from_tiny_tag_with_blank_after_tag_name() {
         let html = "<div   >";
-        let tag = extract_tag_name(html);
+        let tag = extract_tag_name(html).unwrap();
         assert_eq!("div", tag.name);
         assert_eq!(html.len(), tag.length);
 
         let html = "<div  id='foo' >";
-        let tag = extract_tag_name(html);
+        let tag = extract_tag_name(html).unwrap();
         assert_eq!("div", tag.name);
         assert_eq!("foo", tag.attributes.get("id").unwrap());
         assert_eq!(html.len(), tag.length);
 
         let html = "<div  id=\"foo\" >";
-        let tag = extract_tag_name(html);
+        let tag = extract_tag_name(html).unwrap();
         assert_eq!("div", tag.name);
         assert_eq!("foo", tag.attributes.get("id").unwrap());
         assert_eq!(html.len(), tag.length);
@@ -144,14 +172,14 @@ mod tests {
     #[test]
     fn should_extract_zero_html_class() {
         let html = "<div >";
-        let tag = extract_tag_name(html);
+        let tag = extract_tag_name(html).unwrap();
         assert!(tag.attributes.get("class").is_none());
         assert_eq!(html.len(), tag.length);
     }
     #[test]
     fn should_extract_one_html_class() {
         let html = "<div  class=\"bar\" >";
-        let tag = extract_tag_name(html);
+        let tag = extract_tag_name(html).unwrap();
         assert!(tag.attributes.get("class").is_some());
         assert_eq!(Some(&String::from("bar")), tag.attributes.get("class"));
         assert_eq!(html.len(), tag.length);
@@ -159,7 +187,7 @@ mod tests {
     #[test]
     fn should_extract_many_html_classes() {
         let html = "<div  class='bar   baz   foo mun' >";
-        let tag = extract_tag_name(html);
+        let tag = extract_tag_name(html).unwrap();
         assert_eq!("div", tag.name);
         assert!(tag.attributes.get("class").is_some());
         assert_eq!(
@@ -172,7 +200,7 @@ mod tests {
     #[test]
     fn should_extract_consider_id_and_class_as_attributes() {
         let html = "<div id='foo' class='bar'>";
-        let tag = extract_tag_name(html);
+        let tag = extract_tag_name(html).unwrap();
         assert!(!tag.attributes.is_empty());
         assert_eq!(2, tag.attributes.len());
         assert_eq!("foo", tag.attributes.get("id").unwrap());
@@ -183,7 +211,7 @@ mod tests {
     #[test]
     fn should_extract_ignore_id_and_class_as_attributes_and_read_one() {
         let html = "<input id='foo' class='bar' type='password'>";
-        let tag = extract_tag_name(html);
+        let tag = extract_tag_name(html).unwrap();
         assert!(!tag.attributes.is_empty());
         println!("attributes {:?}", tag.attributes);
         assert_eq!(3, tag.attributes.len());
@@ -197,20 +225,19 @@ mod tests {
             class='bar'
             about
         >"#;
-        let tag = extract_tag_name(html);
+        let tag = extract_tag_name(html).unwrap();
         assert_eq!("div", tag.name);
         assert_eq!(html.len(), tag.length);
     }
     #[test]
     fn should_extract_auto_closing_tag() {
-        let tag = extract_tag_name("<br/>");
+        let tag = extract_tag_name("<br/>").unwrap();
         assert_eq!("br", tag.name);
         assert_eq!(5, tag.length);
     }
     #[test]
     fn should_extract_tag_name_that_does_not_close() {
         let tag = extract_tag_name("<br");
-        assert_eq!("br", tag.name);
-        assert_eq!(4, tag.length);
+        assert_eq!(None, tag);
     }
 }
