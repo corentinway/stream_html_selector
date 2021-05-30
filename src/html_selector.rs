@@ -101,15 +101,19 @@ impl HtmlSelector {
         } else if word.ends_with("/>") {
             // put the tag,
             let tag = tag::extract_tag_name(word);
-            self.increase_path(tag.name);
-            // search for css request
-            // auto delete the tag imediatelly
-            updated = NewTagToDelete;
+            if tag.is_some() {
+                self.increase_path(tag.unwrap().name);
+                // search for css request
+                // auto delete the tag imediatelly
+                updated = NewTagToDelete;
+            }
         } else if word.get(0..1) == Some("<") {
             // start of tag
             let tag = tag::extract_tag_name(word);
-            self.increase_path(tag.name);
-            updated = TagAdded;
+            if tag.is_some() {
+                self.increase_path(tag.unwrap().name);
+                updated = TagAdded;
+            }
         } else {
             //println!("no mathcing");
         }
