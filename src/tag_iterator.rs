@@ -25,14 +25,11 @@ impl Iterator for TagIterator<'_> {
         if self.html.is_empty() {
             None
         } else if is_start_element(self.html) {
-            let mut tag = extract_tag_name(self.html);
-            if tag.is_none() {
-                return None; // FIXME test it
-            }
-            let tag = tag.take().unwrap();
+
+            let tag = extract_tag_name(self.html)?;
             let reduced_html = self.html.get(tag.length..);
-            if reduced_html.is_some() {
-                self.html = reduced_html.unwrap();
+            if let Some(html) = reduced_html {
+                self.html = html;
             } else {
                 self.html = "";
             }
@@ -40,8 +37,9 @@ impl Iterator for TagIterator<'_> {
         } else if is_end_element(self.html) {
             let (name, length) = extract_end_tag_name(self.html);
             let reduced_html = self.html.get(length..);
-            if reduced_html.is_some() {
-                self.html = reduced_html.unwrap();
+
+            if let Some(html) = reduced_html {
+                self.html = html;
             } else {
                 self.html = "";
             }
@@ -69,9 +67,8 @@ fn is_element_like(html : &str, start: &str, expected_smallest_length : usize) -
     let is_start = html.get(0..start.len()) == Some(start);
 
     let first_letter_tag_name = html.get(start.len()..start.len()+1);
-    if first_letter_tag_name.is_some() {
+    if let Some(first_letter_tag_name) = first_letter_tag_name {
         let is_alphabetic = first_letter_tag_name
-            .unwrap()
             .chars()
             .next()
             .unwrap()
@@ -187,9 +184,5 @@ mod tag_iterator_tests {
         assert_eq!(None, tag_iterator.next());
     }
 
-    /*
-    TODO
-     test autoclosing tag
-     add `is_autoclosing`to struct Tag
-    */
+
 }

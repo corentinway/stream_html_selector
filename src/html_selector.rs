@@ -100,18 +100,20 @@ impl HtmlSelector {
             self.reduce_path();
         } else if word.ends_with("/>") {
             // put the tag,
-            let tag = tag::extract_tag_name(word);
-            if tag.is_some() {
-                self.increase_path(tag.unwrap().name);
+
+            let tag_option = tag::extract_tag_name(word);
+            if let Some(tag) = tag_option {
+                self.increase_path(tag.name);
                 // search for css request
                 // auto delete the tag imediatelly
                 updated = NewTagToDelete;
             }
         } else if word.get(0..1) == Some("<") {
             // start of tag
-            let tag = tag::extract_tag_name(word);
-            if tag.is_some() {
-                self.increase_path(tag.unwrap().name);
+
+            let tag_option = tag::extract_tag_name(word);
+            if let Some(tag) = tag_option {
+                self.increase_path(tag.name);
                 updated = TagAdded;
             }
         } else {

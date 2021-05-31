@@ -31,23 +31,20 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
     let end_autoclosing = html.find("/>");
     let mut is_autoclosing_tag = end_autoclosing.is_some(); // FIXME
 
-    let end_closing = html.find(">");
 
+    let end_closing = html.find('>');
 
-    let end = if end_autoclosing.is_some() && end_closing.is_some() {
-        //      >      before  />
-        // or   />     before   >
-        let end_autoclosing = end_autoclosing.unwrap();
-        let end_closing = end_closing.unwrap();
-        is_autoclosing_tag = end_autoclosing < end_closing;
-        cmp::min(end_autoclosing, end_closing)
-    } else if end_autoclosing.is_some() && end_closing.is_none() {
-        end_autoclosing.unwrap()
-    } else if end_autoclosing.is_none() && end_closing.is_some() {
-        end_closing.unwrap()
-    } else {
-        return None;
+    let end = match (end_autoclosing, end_closing) {
+        (Some(end_autoclosing), Some(end_closing)) => {
+            is_autoclosing_tag = end_autoclosing < end_closing;
+            cmp::min(end_autoclosing, end_closing)
+        },
+        (Some(end_autoclosing), None) => end_autoclosing,
+        (None, Some(end_closing)) => end_closing,
+        _ => return None,
     };
+
+
 
     let tag_content = html.get(start + 1..end).unwrap();
 
@@ -58,10 +55,10 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
 
     let start_attributes_index = tag_content.find(' ');
 
+
     let end_attributes_index = tag_content.len();
 
-    let attributes = if start_attributes_index.is_some() {
-        let start_attributes_index = start_attributes_index.unwrap();
+    let attributes = if let Some(start_attributes_index) = start_attributes_index {
         let attributes_code = tag_content
             .get(start_attributes_index..end_attributes_index)
             .unwrap_or_default();
@@ -74,11 +71,12 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
     let offset = if is_autoclosing_tag { 2 } else { 1 };
 
     let name = tag_content
-        .find(" ")
+        .find(' ')
         .and_then(|position| tag_content.get(0..position));
 
-    let name = if name.is_some() {
-        name.unwrap().to_string()
+    let name = if let Some(name) = name {
+        name.to_string()
+
     } else {
         tag_content
     };
@@ -88,6 +86,7 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
         attributes,
         length: end - start + offset,
     })
+
 }
 
 /// Parse an starting HTML tag like `<div id'foo' class="bar" hidden aria-label='baz'>`
@@ -103,15 +102,15 @@ fn extract_element_like(html: &str, start_str: &str, end_str: &str) -> (String, 
 
     let tag_content = html.get(start..end).unwrap();
 
-    let tag_content: String = tag_content
+    let name: String = tag_content
         .replace("\n\r", "")
         .replace("\n", "")
         .replace("\r", "");
 
-    let name = tag_content.to_string();
     let length = name.len() + start + end_str.len();
     (name, length)
 }
+
 
 
 
