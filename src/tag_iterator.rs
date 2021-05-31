@@ -9,7 +9,7 @@ use crate::tag::Tag;
 #[derive(PartialEq, Debug)]
 enum Elements {
     StartElement(Tag),
-    EndElements(String),
+    EndElement(String),
 }
 
 struct TagIterator<'a> {
@@ -42,7 +42,7 @@ impl Iterator for TagIterator<'_> {
             Some(Elements::StartElement(tag))
         } else if let Some(end_element) = EndElement::extract(self.html) {
             self.reduce_html(end_element.length);
-            Some(Elements::EndElements(end_element.name))
+            Some(Elements::EndElement(end_element.name))
         } else {
             None
         }
@@ -118,7 +118,7 @@ mod tag_iterator_tests {
 
         assert_eq!(Some(get_simple_div()), tag_iterator.next());
         assert_eq!(
-            Some(Elements::EndElements(String::from("div"))),
+            Some(Elements::EndElement(String::from("div"))),
             tag_iterator.next()
         );
         assert_eq!(None, tag_iterator.next());
@@ -144,7 +144,7 @@ mod tag_iterator_tests {
             tag_iterator.next()
         );
         assert_eq!(
-            Some(Elements::EndElements(String::from("div"))),
+            Some(Elements::EndElement(String::from("div"))),
             tag_iterator.next()
         );
         assert_eq!(None, tag_iterator.next());
