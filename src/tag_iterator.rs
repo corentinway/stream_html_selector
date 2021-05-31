@@ -1,5 +1,10 @@
 use crate::tag::extract_tag_name;
-use crate::tag::extract_end_tag_name;
+
+use crate::elements::end_element::extract_end_tag_name;
+use crate::elements::end_element::is_end_element;
+
+
+use crate::elements::is_element_like;
 use crate::tag::Tag;
 
 #[derive(PartialEq, Debug)]
@@ -56,28 +61,7 @@ fn is_start_element(html: &str) -> bool {
     is_element_like(html, "<", 3)
 }
 
-/// return true if the element starts with `</` and a letter
-fn is_end_element(html: &str) -> bool {
-    // min length 4, like `</a>`
-    is_element_like(html, "</", 4)
-}
 
-fn is_element_like(html : &str, start: &str, expected_smallest_length : usize) -> bool {
-    let has_smallest_length_possible = html.len() >= expected_smallest_length;
-    let is_start = html.get(0..start.len()) == Some(start);
-
-    let first_letter_tag_name = html.get(start.len()..start.len()+1);
-    if let Some(first_letter_tag_name) = first_letter_tag_name {
-        let is_alphabetic = first_letter_tag_name
-            .chars()
-            .next()
-            .unwrap()
-            .is_alphabetic();
-        has_smallest_length_possible && is_start && is_alphabetic
-    } else {
-        false
-    }
-}
 
 
 
@@ -94,15 +78,6 @@ mod test_utils {
         assert_eq!(false, is_start_element("hello"));
         assert_eq!(false, is_start_element("<123"));
         assert_eq!(false, is_start_element("</p>"));
-    }
-    #[test]
-    fn shohuld_test_end_element() {
-        assert_eq!(true, is_end_element("</p>"));
-        assert_eq!(true, is_end_element("</div>"));
-
-        assert_eq!(false, is_end_element("<div>"));
-        assert_eq!(false, is_end_element("hello"));
-        assert_eq!(false, is_end_element("<!-- foo -->"));
     }
 }
 

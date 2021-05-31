@@ -89,27 +89,10 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
 
 }
 
-/// Parse an starting HTML tag like `<div id'foo' class="bar" hidden aria-label='baz'>`
-pub fn extract_end_tag_name(html: &str) -> (String, usize) {
-    extract_element_like(html, "</", ">")
-}
 
 
-fn extract_element_like(html: &str, start_str: &str, end_str: &str) -> (String, usize) {
-    let start = start_str.len();
 
-    let end = html.find(end_str).unwrap();
 
-    let tag_content = html.get(start..end).unwrap();
-
-    let name: String = tag_content
-        .replace("\n\r", "")
-        .replace("\n", "")
-        .replace("\r", "");
-
-    let length = name.len() + start + end_str.len();
-    (name, length)
-}
 
 
 
