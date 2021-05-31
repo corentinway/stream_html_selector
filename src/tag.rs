@@ -31,6 +31,7 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
     let end_autoclosing = html.find("/>");
     let mut is_autoclosing_tag = end_autoclosing.is_some(); // FIXME
 
+
     let end_closing = html.find('>');
 
     let end = match (end_autoclosing, end_closing) {
@@ -45,8 +46,6 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
 
 
 
-
-
     let tag_content = html.get(start + 1..end).unwrap();
 
     let tag_content: String = tag_content
@@ -55,6 +54,7 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
         .replace("\r", " ");
 
     let start_attributes_index = tag_content.find(' ');
+
 
     let end_attributes_index = tag_content.len();
 
@@ -76,6 +76,7 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
 
     let name = if let Some(name) = name {
         name.to_string()
+
     } else {
         tag_content
     };
@@ -85,6 +86,7 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
         attributes,
         length: end - start + offset,
     })
+
 }
 
 /// Parse an starting HTML tag like `<div id'foo' class="bar" hidden aria-label='baz'>`
@@ -108,6 +110,7 @@ fn extract_element_like(html: &str, start_str: &str, end_str: &str) -> (String, 
     let length = name.len() + start + end_str.len();
     (name, length)
 }
+
 
 
 

@@ -25,6 +25,7 @@ impl Iterator for TagIterator<'_> {
         if self.html.is_empty() {
             None
         } else if is_start_element(self.html) {
+
             let tag = extract_tag_name(self.html)?;
             let reduced_html = self.html.get(tag.length..);
             if let Some(html) = reduced_html {
@@ -36,6 +37,7 @@ impl Iterator for TagIterator<'_> {
         } else if is_end_element(self.html) {
             let (name, length) = extract_end_tag_name(self.html);
             let reduced_html = self.html.get(length..);
+
             if let Some(html) = reduced_html {
                 self.html = html;
             } else {
@@ -182,5 +184,5 @@ mod tag_iterator_tests {
         assert_eq!(None, tag_iterator.next());
     }
 
-   
+
 }
