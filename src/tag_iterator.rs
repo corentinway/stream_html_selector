@@ -1,10 +1,6 @@
-use crate::tag::extract_tag_name;
 
-use crate::elements::Element;
-use crate::elements::end_element::EndElement;
+use crate::elements::{Element, end_element::EndElement, start_element::Tag};
 
-use crate::elements::is_element_like;
-use crate::tag::Tag;
 
 #[derive(PartialEq, Debug)]
 enum Elements {
@@ -36,10 +32,9 @@ impl Iterator for TagIterator<'_> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.html.is_empty() {
             None
-        } else if is_start_element(self.html) {
-            let tag = extract_tag_name(self.html)?;
-            self.reduce_html(tag.length);
-            Some(Elements::StartElement(tag))
+        } else if let Some(start_element) = Tag::extract(self.html) {
+            self.reduce_html(start_element.length);
+            Some(Elements::StartElement(start_element))
         } else if let Some(end_element) = EndElement::extract(self.html) {
             self.reduce_html(end_element.length);
             Some(Elements::EndElement(end_element.name))
@@ -49,27 +44,7 @@ impl Iterator for TagIterator<'_> {
     }
 }
 
-/// return true if the element starts with `<` and a letter
-fn is_start_element(html: &str) -> bool {
-    // min length 3, like `<a>`
-    is_element_like(html, "<", 3)
-}
 
-#[cfg(test)]
-mod test_utils {
-    use super::*;
-    #[test]
-    fn should_test_start_element() {
-        assert_eq!(true, is_start_element("<a>"));
-        assert_eq!(true, is_start_element("<div>"));
-        assert_eq!(true, is_start_element("<br>"));
-        assert_eq!(true, is_start_element("<br/>"));
-
-        assert_eq!(false, is_start_element("hello"));
-        assert_eq!(false, is_start_element("<123"));
-        assert_eq!(false, is_start_element("</p>"));
-    }
-}
 
 #[cfg(test)]
 mod tag_iterator_tests {
