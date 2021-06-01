@@ -1,11 +1,12 @@
 
-use crate::elements::{Element, end_element::EndElement, start_element::Tag};
+use crate::elements::{Element, end_element::EndElement, start_element::Tag, comment_element::CommentElement};
 
 
 #[derive(PartialEq, Debug)]
 enum Elements {
     StartElement(Tag),
     EndElement(String),
+    CommentElement(String),
 }
 
 struct TagIterator<'a> {
@@ -38,6 +39,9 @@ impl Iterator for TagIterator<'_> {
         } else if let Some(end_element) = EndElement::extract(self.html) {
             self.reduce_html(end_element.length);
             Some(Elements::EndElement(end_element.name))
+        } else if let Some(comment_element) = CommentElement::extract(self.html) {
+            self.reduce_html(comment_element.length);
+            Some(Elements::CommentElement(comment_element.content))
         } else {
             None
         }
@@ -122,6 +126,25 @@ mod tag_iterator_tests {
             Some(Elements::EndElement(String::from("div"))),
             tag_iterator.next()
         );
+        assert_eq!(None, tag_iterator.next());
+    }
+
+    #[test]
+    fn should_return_start_element_comment_element_end_elements() {
+        let html = "<div><!-- hello world --></div>";
+        let mut tag_iterator = TagIterator::new(html);
+
+        assert_eq!(Some(get_simple_div()), tag_iterator.next());
+        
+        assert_eq!(Some(Elements::CommentElement(String::from(" hello world "))),
+            tag_iterator.next()
+        );
+
+        assert_eq!(
+            Some(Elements::EndElement(String::from("div"))),
+            tag_iterator.next()
+        );
+        
         assert_eq!(None, tag_iterator.next());
     }
 }

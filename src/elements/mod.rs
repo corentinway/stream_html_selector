@@ -1,5 +1,6 @@
 pub mod start_element;
 pub mod end_element;
+pub mod comment_element;
 mod utils;
 
 pub trait Element<T> {
