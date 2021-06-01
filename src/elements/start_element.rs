@@ -1,4 +1,13 @@
-use super::tag_parser::TagParser;
+use super::{Element, is_element_like};
+
+
+/// return true if the element starts with `<` and a letter
+fn is_start_element(html: &str) -> bool {
+    // min length 3, like `<a>`
+    is_element_like(html, "<", 3)
+}
+
+use crate::tag_parser::TagParser;
 use std::cmp;
 use std::collections::HashMap;
 
@@ -81,6 +90,33 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
         attributes,
         length: end - start + offset,
     })
+}
+
+
+impl Element<Tag> for Tag {
+    fn extract(html: &str) -> Option<Tag> {
+        if is_start_element(html) {
+            extract_tag_name(html)
+        } else {
+            None
+        }
+    }
+}
+
+#[cfg(test)]
+mod test_utils {
+    use super::*;
+    #[test]
+    fn should_test_start_element() {
+        assert_eq!(true, is_start_element("<a>"));
+        assert_eq!(true, is_start_element("<div>"));
+        assert_eq!(true, is_start_element("<br>"));
+        assert_eq!(true, is_start_element("<br/>"));
+
+        assert_eq!(false, is_start_element("hello"));
+        assert_eq!(false, is_start_element("<123"));
+        assert_eq!(false, is_start_element("</p>"));
+    }
 }
 
 #[cfg(test)]
@@ -199,3 +235,4 @@ mod tests {
         assert_eq!(None, tag);
     }
 }
+

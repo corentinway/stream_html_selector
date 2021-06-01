@@ -1,4 +1,5 @@
-use super::tag;
+use crate::elements::start_element::extract_tag_name;
+
 
 #[derive(PartialEq)]
 enum PathUpdateState {
@@ -101,7 +102,7 @@ impl HtmlSelector {
         } else if word.ends_with("/>") {
             // put the tag,
 
-            let tag_option = tag::extract_tag_name(word);
+            let tag_option = extract_tag_name(word);
             if let Some(tag) = tag_option {
                 self.increase_path(tag.name);
                 // search for css request
@@ -111,7 +112,7 @@ impl HtmlSelector {
         } else if word.get(0..1) == Some("<") {
             // start of tag
 
-            let tag_option = tag::extract_tag_name(word);
+            let tag_option = extract_tag_name(word);
             if let Some(tag) = tag_option {
                 self.increase_path(tag.name);
                 updated = TagAdded;

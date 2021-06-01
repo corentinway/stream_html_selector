@@ -1,14 +1,16 @@
 mod html_selector;
 mod selector;
-mod tag;
 mod tag_iterator;
 mod tag_parser;
 
 mod elements;
 
+use elements::start_element::Tag;
+use elements::start_element::extract_tag_name;
+
 /// tmp implementation in order to reduce dead code warning messages
-pub fn parse(html: &str) -> tag::Tag {
-    tag::extract_tag_name(html).unwrap()
+pub fn parse(html: &str) -> Tag {
+    extract_tag_name(html).unwrap()
 }
 
 #[cfg(test)]
