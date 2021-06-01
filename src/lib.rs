@@ -1,6 +1,5 @@
 mod html_selector;
 mod selector;
-mod tag;
 mod tag_iterator;
 mod tag_parser;
 
