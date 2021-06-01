@@ -1,6 +1,6 @@
 use super::tag_parser::TagParser;
-use std::collections::HashMap;
 use std::cmp;
+use std::collections::HashMap;
 
 /// hold elements of an HTML tag
 #[derive(PartialEq, Debug)]
@@ -31,20 +31,17 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
     let end_autoclosing = html.find("/>");
     let mut is_autoclosing_tag = end_autoclosing.is_some(); // FIXME
 
-
     let end_closing = html.find('>');
 
     let end = match (end_autoclosing, end_closing) {
         (Some(end_autoclosing), Some(end_closing)) => {
             is_autoclosing_tag = end_autoclosing < end_closing;
             cmp::min(end_autoclosing, end_closing)
-        },
+        }
         (Some(end_autoclosing), None) => end_autoclosing,
         (None, Some(end_closing)) => end_closing,
         _ => return None,
     };
-
-
 
     let tag_content = html.get(start + 1..end).unwrap();
 
@@ -54,7 +51,6 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
         .replace("\r", " ");
 
     let start_attributes_index = tag_content.find(' ');
-
 
     let end_attributes_index = tag_content.len();
 
@@ -76,7 +72,6 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
 
     let name = if let Some(name) = name {
         name.to_string()
-
     } else {
         tag_content
     };
@@ -86,34 +81,7 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
         attributes,
         length: end - start + offset,
     })
-
 }
-
-/// Parse an starting HTML tag like `<div id'foo' class="bar" hidden aria-label='baz'>`
-pub fn extract_end_tag_name(html: &str) -> (String, usize) {
-    extract_element_like(html, "</", ">")
-}
-
-
-fn extract_element_like(html: &str, start_str: &str, end_str: &str) -> (String, usize) {
-    let start = start_str.len();
-
-    let end = html.find(end_str).unwrap();
-
-    let tag_content = html.get(start..end).unwrap();
-
-    let name: String = tag_content
-        .replace("\n\r", "")
-        .replace("\n", "")
-        .replace("\r", "");
-
-    let length = name.len() + start + end_str.len();
-    (name, length)
-}
-
-
-
-
 
 #[cfg(test)]
 mod tests {

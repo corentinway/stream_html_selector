@@ -4,6 +4,8 @@ mod tag;
 mod tag_iterator;
 mod tag_parser;
 
+mod elements;
+
 /// tmp implementation in order to reduce dead code warning messages
 pub fn parse(html: &str) -> tag::Tag {
     tag::extract_tag_name(html).unwrap()
