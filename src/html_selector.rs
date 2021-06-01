@@ -1,4 +1,3 @@
-use crate::elements::start_element::Tag;
 use crate::elements::start_element::extract_tag_name;
 
 
