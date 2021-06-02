@@ -147,4 +147,26 @@ mod tag_iterator_tests {
         
         assert_eq!(None, tag_iterator.next());
     }
+    #[test]
+    fn should_return_start_element_multiline_comment_element_end_elements() {
+        let html = r#"<div><!-- hello 
+        world --></div>"#;
+
+        let mut tag_iterator = TagIterator::new(html);
+
+        assert_eq!(Some(get_simple_div()), tag_iterator.next());
+
+        let expected_comment_content = r#" hello 
+        world "#.to_string();
+        assert_eq!(Some(Elements::CommentElement(expected_comment_content)),
+            tag_iterator.next()
+        );
+
+        assert_eq!(
+            Some(Elements::EndElement(String::from("div"))),
+            tag_iterator.next()
+        );
+
+        assert_eq!(None, tag_iterator.next());
+    }
 }

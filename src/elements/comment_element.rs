@@ -1,8 +1,8 @@
-use crate::elements::utils::extract_element_like;
+use crate::elements::utils::extract_multiline_element_like;
 
 /// Parse an starting HTML tag like `<div id'foo' class="bar" hidden aria-label='baz'>`
 fn extract_comment_tag_name(html: &str) -> (String, usize) {
-    extract_element_like(html, "<!--", "-->")
+    extract_multiline_element_like(html, "<!--", "-->")
 }   
 
 /// return true if the element starts with `</` and a letter
