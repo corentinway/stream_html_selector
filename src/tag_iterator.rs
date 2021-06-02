@@ -1,11 +1,12 @@
 
-use crate::elements::{Element, end_element::EndElement, start_element::Tag};
+use crate::elements::{Element, end_element::EndElement, start_element::Tag, comment_element::CommentElement};
 
 
 #[derive(PartialEq, Debug)]
 enum Elements {
-    StartElement(Tag),
-    EndElement(String),
+    Start(Tag),
+    End(String),
+    Comment(String),
 }
 
 struct TagIterator<'a> {
@@ -34,10 +35,13 @@ impl Iterator for TagIterator<'_> {
             None
         } else if let Some(start_element) = Tag::extract(self.html) {
             self.reduce_html(start_element.length);
-            Some(Elements::StartElement(start_element))
+            Some(Elements::Start(start_element))
         } else if let Some(end_element) = EndElement::extract(self.html) {
             self.reduce_html(end_element.length);
-            Some(Elements::EndElement(end_element.name))
+            Some(Elements::End(end_element.name))
+        } else if let Some(comment_element) = CommentElement::extract(self.html) {
+            self.reduce_html(comment_element.length);
+            Some(Elements::Comment(comment_element.content))
         } else {
             None
         }
@@ -49,13 +53,13 @@ impl Iterator for TagIterator<'_> {
 #[cfg(test)]
 mod tag_iterator_tests {
 
-    use Elements::StartElement;
+    use Elements::Start;
 
     use super::*;
     use std::collections::HashMap;
 
     fn get_simple_div() -> Elements {
-        StartElement(Tag {
+        Start(Tag {
             name: String::from("div"),
             attributes: HashMap::new(),
             length: 5,
@@ -93,7 +97,7 @@ mod tag_iterator_tests {
 
         assert_eq!(Some(get_simple_div()), tag_iterator.next());
         assert_eq!(
-            Some(Elements::EndElement(String::from("div"))),
+            Some(Elements::End(String::from("div"))),
             tag_iterator.next()
         );
         assert_eq!(None, tag_iterator.next());
@@ -111,7 +115,7 @@ mod tag_iterator_tests {
         expected_attributes.insert("name".to_string(), "password".to_string());
         expected_attributes.insert("hidden".to_string(), "true".to_string());
         assert_eq!(
-            Some(Elements::StartElement(Tag {
+            Some(Elements::Start(Tag {
                 name: "input".to_string(),
                 attributes: expected_attributes,
                 length: 48
@@ -119,9 +123,50 @@ mod tag_iterator_tests {
             tag_iterator.next()
         );
         assert_eq!(
-            Some(Elements::EndElement(String::from("div"))),
+            Some(Elements::End(String::from("div"))),
             tag_iterator.next()
         );
+        assert_eq!(None, tag_iterator.next());
+    }
+
+    #[test]
+    fn should_return_start_element_comment_element_end_elements() {
+        let html = "<div><!-- hello world --></div>";
+        let mut tag_iterator = TagIterator::new(html);
+
+        assert_eq!(Some(get_simple_div()), tag_iterator.next());
+        
+        assert_eq!(Some(Elements::Comment(String::from(" hello world "))),
+            tag_iterator.next()
+        );
+
+        assert_eq!(
+            Some(Elements::End(String::from("div"))),
+            tag_iterator.next()
+        );
+        
+        assert_eq!(None, tag_iterator.next());
+    }
+    #[test]
+    fn should_return_start_element_multiline_comment_element_end_elements() {
+        let html = r#"<div><!-- hello 
+        world --></div>"#;
+
+        let mut tag_iterator = TagIterator::new(html);
+
+        assert_eq!(Some(get_simple_div()), tag_iterator.next());
+
+        let expected_comment_content = r#" hello 
+        world "#.to_string();
+        assert_eq!(Some(Elements::Comment(expected_comment_content)),
+            tag_iterator.next()
+        );
+
+        assert_eq!(
+            Some(Elements::End(String::from("div"))),
+            tag_iterator.next()
+        );
+
         assert_eq!(None, tag_iterator.next());
     }
 }
