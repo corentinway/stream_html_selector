@@ -1,5 +1,10 @@
 
-use crate::elements::{Element, end_element::EndElement, start_element::Tag, comment_element::CommentElement};
+use crate::elements::{Element, 
+    end_element::EndElement, 
+    start_element::Tag, 
+    comment_element::CommentElement,
+    text_element::TextElement
+};
 
 
 #[derive(PartialEq, Debug)]
@@ -7,6 +12,7 @@ enum Elements {
     Start(Tag),
     End(String),
     Comment(String),
+    Text(String),
 }
 
 struct TagIterator<'a> {
@@ -42,6 +48,9 @@ impl Iterator for TagIterator<'_> {
         } else if let Some(comment_element) = CommentElement::extract(self.html) {
             self.reduce_html(comment_element.length);
             Some(Elements::Comment(comment_element.content))
+        } else if let Some(text_element) = TextElement::extract(self.html) {
+            self.reduce_html(text_element.length);
+            Some(Elements::Text(text_element.content))
         } else {
             None
         }
@@ -167,6 +176,48 @@ mod tag_iterator_tests {
             tag_iterator.next()
         );
 
+        assert_eq!(None, tag_iterator.next());
+    }
+
+    #[test]
+    fn should_return_start_element_text_element_end_elements() {
+        let html = "<div>hello world</div>";
+        let mut tag_iterator = TagIterator::new(html);
+
+        assert_eq!(Some(get_simple_div()), tag_iterator.next());
+        
+        assert_eq!(Some(Elements::Text(String::from("hello world"))),
+            tag_iterator.next()
+        );
+
+        assert_eq!(
+            Some(Elements::End(String::from("div"))),
+            tag_iterator.next()
+        );
+        
+        assert_eq!(None, tag_iterator.next());
+    }
+    #[test]
+    fn should_return_start_element_multiline_text_element_end_elements() {
+        let html = r#"<div>hello 
+        world</div>"#;
+        let mut tag_iterator = TagIterator::new(html);
+
+        assert_eq!(Some(get_simple_div()), tag_iterator.next());
+        
+
+        let exptected_text = r#"hello 
+        world"#.to_string();
+
+        assert_eq!(Some(Elements::Text(exptected_text)),
+            tag_iterator.next()
+        );
+
+        assert_eq!(
+            Some(Elements::End(String::from("div"))),
+            tag_iterator.next()
+        );
+        
         assert_eq!(None, tag_iterator.next());
     }
 }
