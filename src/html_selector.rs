@@ -1,25 +1,8 @@
 use crate::tag_iterator::{Elements, TagIterator};
 
-#[derive(PartialEq)]
-enum PathUpdateState {
-    TagAdded,
-    TagDeleted,
-    NewTagToDelete,
-}
-
-use PathUpdateState::*;
-
-#[derive(PartialEq)]
-enum State {
-    Start,
-    StartElement,
-    EndElement,
-}
-
 pub struct HtmlSelector {
     tag_path: Vec<String>,
     tag_path_string: String,
-    state: State,
 }
 
 impl HtmlSelector {
@@ -27,7 +10,6 @@ impl HtmlSelector {
         HtmlSelector {
             tag_path: Vec::new(),
             tag_path_string: String::new(),
-            state: State::Start,
         }
     }
 

@@ -18,13 +18,13 @@ impl Element<TextElement> for TextElement {
 }
 
 fn extract_text_element(html: &str) -> (String, usize) {
-    let end = html.find("<").unwrap_or_else(|| html.len());
+    let end = html.find('<').unwrap_or_else(|| html.len());
     let text = html.get(..end).unwrap();
     (text.to_string(), end)
 }
 
 fn is_text_element(html: &str) -> bool {
-    if html.len() > 0 {
+    if !html.is_empty() {
         let first_char = html.get(0..1);
         match first_char {
             Some(char_str) => char_str != "<",
