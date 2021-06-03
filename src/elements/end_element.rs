@@ -29,14 +29,13 @@ mod test_utils {
 
 use crate::elements::Element;
 
-#[derive(PartialEq,Debug)]
+#[derive(PartialEq, Debug)]
 pub struct EndElement {
     pub name: String,
     pub length: usize,
 }
 
 impl Element<EndElement> for EndElement {
-
     fn extract(html: &str) -> Option<EndElement> {
         if is_end_element(html) {
             let (name, length) = extract_end_tag_name(html);
@@ -51,19 +50,22 @@ impl Element<EndElement> for EndElement {
 mod test_end_elements {
     use super::*;
 
-    #[test] 
+    #[test]
     fn should_return_none_in_case_of_invalid_end_element() {
-        let html ="<div>";
+        let html = "<div>";
         let end_element = EndElement::extract(html);
         assert_eq!(None, end_element);
     }
-    #[test] 
+    #[test]
     fn should_return_some_in_case_of_valid_end_element() {
-        let html ="</div>";
+        let html = "</div>";
         let end_element = EndElement::extract(html);
-        assert_eq!(Some(EndElement {
-            name: "div".to_string(),
-            length: 6
-        }), end_element);
+        assert_eq!(
+            Some(EndElement {
+                name: "div".to_string(),
+                length: 6
+            }),
+            end_element
+        );
     }
 }

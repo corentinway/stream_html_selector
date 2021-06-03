@@ -5,8 +5,8 @@ mod tag_parser;
 
 mod elements;
 
-use elements::start_element::Tag;
 use elements::start_element::extract_tag_name;
+use elements::start_element::Tag;
 
 /// tmp implementation in order to reduce dead code warning messages
 pub fn parse(html: &str) -> Tag {

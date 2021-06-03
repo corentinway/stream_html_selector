@@ -13,7 +13,11 @@ pub fn extract_element_like(html: &str, start_str: &str, end_str: &str) -> (Stri
     let length = name.len() + start + end_str.len();
     (name, length)
 }
-pub fn extract_multiline_element_like(html: &str, start_str: &str, end_str: &str) -> (String, usize) {
+pub fn extract_multiline_element_like(
+    html: &str,
+    start_str: &str,
+    end_str: &str,
+) -> (String, usize) {
     let start = start_str.len();
 
     let end = html.find(end_str).unwrap();
@@ -49,9 +53,9 @@ mod test_utils {
         let (content, length) = extract_multiline_element_like(html, "<!--", "-->");
 
         let expected_content = r#"Hello
-        World"#.to_string();
+        World"#
+            .to_string();
         assert_eq!(expected_content, content);
         assert_eq!(26, length);
-
     }
 }

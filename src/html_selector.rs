@@ -1,74 +1,50 @@
-use crate::elements::start_element::extract_tag_name;
+use crate::tag_iterator::{Elements, TagIterator};
 
-
-#[derive(PartialEq)]
-enum PathUpdateState {
-    TagAdded,
-    TagDeleted,
-    NewTagToDelete,
-}
-
-use PathUpdateState::*;
-
-#[derive(PartialEq)]
-enum State {
-    Start,
-    StartElement,
-    EndElement,
-}
-
-struct HtmlSelector {
+pub struct HtmlSelector {
     tag_path: Vec<String>,
     tag_path_string: String,
-    state: State,
 }
 
 impl HtmlSelector {
-    fn new() -> Self {
+    pub fn new() -> Self {
         HtmlSelector {
             tag_path: Vec::new(),
             tag_path_string: String::new(),
-            state: State::Start,
         }
+    }
+
+    fn search_for_css(&self, css_requests: &[&str], counts: &mut Vec<usize>) {
+        css_requests
+            .iter()
+            .enumerate()
+            .for_each(|(index, request)| {
+                if self.match_request(request) {
+                    counts[index] += 1;
+                }
+            });
     }
 
     pub fn count(&mut self, html: &str, css_requests: &[&str]) -> Vec<usize> {
         let mut counts = vec![0; css_requests.len()];
 
-        let mut tag = String::new();
-
-        html.chars()
-            // filter HTML tags
-            .for_each(|c| {
-                if c == '<' {
-                    self.state = State::StartElement
-                }
-                if self.state == State::StartElement {
-                    tag.push(c)
-                }
-                if c == '>' {
-                    self.state = State::EndElement;
-
-                    let updated = self.update_tag_path(&tag);
-
-                    if updated == TagAdded || updated == NewTagToDelete {
-                        css_requests
-                            .iter()
-                            .enumerate()
-                            .for_each(|(index, request)| {
-                                //println!("word : {:?} request {:?}", word, request);
-
-                                if self.match_request(request) {
-                                    counts[index] += 1;
-                                }
-                            });
-                        if updated == NewTagToDelete {
-                            self.reduce_path();
-                        }
+        let tag_iterator = TagIterator::new(html);
+        tag_iterator.for_each(|element| {
+            match element {
+                Elements::Start(tag) => {
+                    self.increase_path(tag.name);
+                    self.search_for_css(css_requests, &mut counts);
+                    if tag.is_autoclosing {
+                        self.reduce_path();
                     }
-                    tag = String::new();
                 }
-            });
+                Elements::End(_) => {
+                    self.reduce_path();
+                }
+                //Elements::Comment(tag) => {},
+                //Elements::Text(tag) => {},
+                _ => {}
+            }
+        });
 
         counts
     }
@@ -91,40 +67,6 @@ impl HtmlSelector {
         self.tag_path.push(tag_name);
         self.tag_path_string = self.tag_path.join(" ");
     }
-
-    fn update_tag_path(&mut self, word: &str) -> PathUpdateState {
-        let mut updated = TagDeleted;
-        //println!("   WORD = {:?}", word);
-
-        if word.get(0..2) == Some("</") {
-            // end of tag
-            self.reduce_path();
-        } else if word.ends_with("/>") {
-            // put the tag,
-
-            let tag_option = extract_tag_name(word);
-            if let Some(tag) = tag_option {
-                self.increase_path(tag.name);
-                // search for css request
-                // auto delete the tag imediatelly
-                updated = NewTagToDelete;
-            }
-        } else if word.get(0..1) == Some("<") {
-            // start of tag
-
-            let tag_option = extract_tag_name(word);
-            if let Some(tag) = tag_option {
-                self.increase_path(tag.name);
-                updated = TagAdded;
-            }
-        } else {
-            //println!("no mathcing");
-        }
-
-        //println!("tag path {:?}\n", self.tag_path_string);
-
-        updated
-    }
 }
 
 #[cfg(test)]
@@ -132,6 +74,7 @@ mod tests {
 
     use super::*;
     use std::fs;
+    use std::time::Instant;
 
     fn get_html() -> String {
         let filename = "./amazon_command.html";
@@ -139,7 +82,7 @@ mod tests {
     }
 
     #[test]
-    fn should_return_all_body_tag() {
+    fn should_count_all_body_tag() {
         let html = get_html();
 
         let css_request = vec!["body"];
@@ -149,6 +92,21 @@ mod tests {
         let count = html_selector.count(&html, &css_request);
 
         assert_eq!(count, vec![1]);
+    }
+    #[test]
+    fn should_count_all_td_tag() {
+        let html = get_html();
+
+        let css_request = vec!["td"];
+
+        let mut html_selector = HtmlSelector::new();
+
+        let now = Instant::now();
+        let count = html_selector.count(&html, &css_request);
+
+        println!("Parsing execution time: {} ms", now.elapsed().as_millis());
+
+        assert_eq!(count, vec![69]);
     }
 
     #[test]

@@ -1,26 +1,22 @@
-
-use crate::elements::{Element, 
-    end_element::EndElement, 
-    start_element::Tag, 
-    comment_element::CommentElement,
-    text_element::TextElement
+use crate::elements::{
+    comment_element::CommentElement, end_element::EndElement, start_element::Tag,
+    text_element::TextElement, Element,
 };
 
-
 #[derive(PartialEq, Debug)]
-enum Elements {
+pub enum Elements {
     Start(Tag),
     End(String),
     Comment(String),
     Text(String),
 }
 
-struct TagIterator<'a> {
+pub struct TagIterator<'a> {
     html: &'a str,
 }
 
 impl<'a> TagIterator<'a> {
-    fn new(html: &'a str) -> Self {
+    pub fn new(html: &'a str) -> Self {
         TagIterator { html }
     }
     fn reduce_html(&mut self, element_length: usize) {
@@ -57,8 +53,6 @@ impl Iterator for TagIterator<'_> {
     }
 }
 
-
-
 #[cfg(test)]
 mod tag_iterator_tests {
 
@@ -72,6 +66,7 @@ mod tag_iterator_tests {
             name: String::from("div"),
             attributes: HashMap::new(),
             length: 5,
+            is_autoclosing: false,
         })
     }
 
@@ -127,7 +122,8 @@ mod tag_iterator_tests {
             Some(Elements::Start(Tag {
                 name: "input".to_string(),
                 attributes: expected_attributes,
-                length: 48
+                length: 48,
+                is_autoclosing: true
             })),
             tag_iterator.next()
         );
@@ -144,8 +140,9 @@ mod tag_iterator_tests {
         let mut tag_iterator = TagIterator::new(html);
 
         assert_eq!(Some(get_simple_div()), tag_iterator.next());
-        
-        assert_eq!(Some(Elements::Comment(String::from(" hello world "))),
+
+        assert_eq!(
+            Some(Elements::Comment(String::from(" hello world "))),
             tag_iterator.next()
         );
 
@@ -153,7 +150,7 @@ mod tag_iterator_tests {
             Some(Elements::End(String::from("div"))),
             tag_iterator.next()
         );
-        
+
         assert_eq!(None, tag_iterator.next());
     }
     #[test]
@@ -166,8 +163,10 @@ mod tag_iterator_tests {
         assert_eq!(Some(get_simple_div()), tag_iterator.next());
 
         let expected_comment_content = r#" hello 
-        world "#.to_string();
-        assert_eq!(Some(Elements::Comment(expected_comment_content)),
+        world "#
+            .to_string();
+        assert_eq!(
+            Some(Elements::Comment(expected_comment_content)),
             tag_iterator.next()
         );
 
@@ -185,8 +184,9 @@ mod tag_iterator_tests {
         let mut tag_iterator = TagIterator::new(html);
 
         assert_eq!(Some(get_simple_div()), tag_iterator.next());
-        
-        assert_eq!(Some(Elements::Text(String::from("hello world"))),
+
+        assert_eq!(
+            Some(Elements::Text(String::from("hello world"))),
             tag_iterator.next()
         );
 
@@ -194,7 +194,7 @@ mod tag_iterator_tests {
             Some(Elements::End(String::from("div"))),
             tag_iterator.next()
         );
-        
+
         assert_eq!(None, tag_iterator.next());
     }
     #[test]
@@ -204,20 +204,18 @@ mod tag_iterator_tests {
         let mut tag_iterator = TagIterator::new(html);
 
         assert_eq!(Some(get_simple_div()), tag_iterator.next());
-        
 
         let exptected_text = r#"hello 
-        world"#.to_string();
+        world"#
+            .to_string();
 
-        assert_eq!(Some(Elements::Text(exptected_text)),
-            tag_iterator.next()
-        );
+        assert_eq!(Some(Elements::Text(exptected_text)), tag_iterator.next());
 
         assert_eq!(
             Some(Elements::End(String::from("div"))),
             tag_iterator.next()
         );
-        
+
         assert_eq!(None, tag_iterator.next());
     }
 }
