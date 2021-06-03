@@ -1,5 +1,4 @@
-use super::{Element, is_element_like};
-
+use super::{is_element_like, Element};
 
 /// return true if the element starts with `<` and a letter
 fn is_start_element(html: &str) -> bool {
@@ -20,6 +19,7 @@ pub struct Tag {
     pub attributes: HashMap<String, String>,
     /// length of the whole tag from `<` to `>`
     pub length: usize,
+    pub is_autoclosing: bool,
 }
 
 impl Tag {
@@ -89,9 +89,9 @@ pub fn extract_tag_name(html: &str) -> Option<Tag> {
         name,
         attributes,
         length: end - start + offset,
+        is_autoclosing: is_autoclosing_tag,
     })
 }
-
 
 impl Element<Tag> for Tag {
     fn extract(html: &str) -> Option<Tag> {
@@ -235,4 +235,3 @@ mod tests {
         assert_eq!(None, tag);
     }
 }
-
