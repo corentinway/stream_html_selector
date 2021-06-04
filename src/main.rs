@@ -1,14 +1,11 @@
-
-
+mod elements;
 mod html_selector;
 mod tag_iterator;
-mod elements;
 mod tag_parser;
 
-use std::fs;
 use crate::html_selector::HtmlSelector;
+use std::fs;
 use std::time::Instant;
-
 
 fn main() {
     let filename = "./amazon_command.html";
@@ -24,5 +21,4 @@ fn main() {
     println!("Parsing execution time: {} ms", now.elapsed().as_millis());
 
     assert_eq!(count, vec![69]);
-
 }
