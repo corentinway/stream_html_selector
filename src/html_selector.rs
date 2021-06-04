@@ -1,4 +1,5 @@
 use crate::tag_iterator::{Elements, TagIterator};
+use crate::elements::start_element::Tag;
 
 fn format_css_request(css_requests: &[&str]) -> Vec<String> {
     css_requests
@@ -14,8 +15,8 @@ fn format_css_request(css_requests: &[&str]) -> Vec<String> {
 }
 
 pub struct HtmlSelector {
-    tag_path: Vec<String>,
-    tag_path_string: String,
+    tag_name_path: Vec<String>,
+    tag_name_path_string: String,
 
     find_first_position: Option<usize>,
 }
@@ -23,8 +24,8 @@ pub struct HtmlSelector {
 impl HtmlSelector {
     pub fn new() -> Self {
         HtmlSelector {
-            tag_path: Vec::new(),
-            tag_path_string: String::new(),
+            tag_name_path: Vec::new(),
+            tag_name_path_string: String::new(),
             find_first_position: None,
         }
     }
@@ -112,17 +113,17 @@ impl HtmlSelector {
     }
 
     fn match_request(&self, request: &str) -> bool {
-        self.tag_path_string.ends_with(request)
+        self.tag_name_path_string.ends_with(request)
     }
 
     fn reduce_path(&mut self) {
-        self.tag_path.pop();
-        self.tag_path_string = self.tag_path.join(" ");
+        self.tag_name_path.pop();
+        self.tag_name_path_string = self.tag_name_path.join(" ");
     }
 
     fn increase_path(&mut self, tag_name: String) {
-        self.tag_path.push(tag_name);
-        self.tag_path_string = self.tag_path.join(" ");
+        self.tag_name_path.push(tag_name);
+        self.tag_name_path_string = self.tag_name_path.join(" ");
     }
 }
 
@@ -242,5 +243,57 @@ mod tests {
         let actual_css_requests = format_css_request(&css_requests);
 
         assert_eq!(vec![" body", " div p"], actual_css_requests);
+    }
+
+    // #costBreakdown > tbody > tr:nth-child(9) > td:nth-child(2) > strong
+    #[test]
+    fn should_select_by_id() {
+        let html = get_html();
+
+        let expected_id = String::from("costBreakdown");
+        let id_matcher = |tag: Tag| {
+            if let Some(id) = tag.id() {
+                return *id == expected_id;
+            }
+            false
+        };
+
+        let mut html_selector = HtmlSelector::new();
+
+        let count = html_selector.count_with_matcher(&html, &id_matcher);
+
+        assert_eq!(1, count);
+
+    }
+}
+
+impl HtmlSelector {
+    pub fn count_with_matcher<F>(&mut self, html: &str, f: F) -> usize  
+        where F: Fn(Tag) -> bool
+    {
+        let mut count = 0;
+
+        let tag_iterator = TagIterator::new(html);
+        tag_iterator.for_each(|element| {
+            //println!("PATH : {:?}", self.tag_path);
+
+            match element {
+                Elements::Start(tag, begin, end) => {
+                    //self.increase_path(tag); // READY ??
+                    if f(tag) {
+                        count +=1;
+                    }
+                    
+                }
+                Elements::End(_, _, _) => {
+                    //self.reduce_path();
+                }
+                //Elements::Comment(tag) => {},
+                //Elements::Text(tag) => {},
+                _ => {}
+            }
+        });
+
+        count
     }
 }
