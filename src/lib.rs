@@ -1,10 +1,12 @@
-mod html_selector;
+mod selectors;
 mod selector;
 mod tag_iterator;
 mod tag_parser;
 
 mod elements;
 
+use selectors::tag_name_html_selector::TagNameHtmlSelector;
+use selectors::HtmlSelectorCounter;
 use elements::start_element::extract_tag_name;
 use elements::start_element::Tag;
 
@@ -12,6 +14,12 @@ use elements::start_element::Tag;
 pub fn parse(html: &str) -> Tag {
     extract_tag_name(html).unwrap()
 }
+
+pub fn count(html: &str, css_requests: &[&str]) -> Vec<usize> {
+    let mut html_selector = TagNameHtmlSelector::new();
+    html_selector.count(html, css_requests)
+}
+
 
 #[cfg(test)]
 mod test {
