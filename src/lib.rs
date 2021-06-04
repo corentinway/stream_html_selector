@@ -1,14 +1,14 @@
-mod selectors;
 mod selector;
+mod selectors;
 mod tag_iterator;
 mod tag_parser;
 
 mod elements;
 
-use selectors::tag_name_html_selector::TagNameHtmlSelector;
-use selectors::HtmlSelectorCounter;
 use elements::start_element::extract_tag_name;
 use elements::start_element::Tag;
+use selectors::tag_name_html_selector::TagNameHtmlSelector;
+use selectors::HtmlSelectorCounter;
 
 /// tmp implementation in order to reduce dead code warning messages
 pub fn parse(html: &str) -> Tag {
@@ -19,7 +19,6 @@ pub fn count(html: &str, css_requests: &[&str]) -> Vec<usize> {
     let mut html_selector = TagNameHtmlSelector::new();
     html_selector.count(html, css_requests)
 }
-
 
 #[cfg(test)]
 mod test {

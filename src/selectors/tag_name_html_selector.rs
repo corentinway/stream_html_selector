@@ -1,16 +1,13 @@
-use crate::tag_iterator::{Elements, TagIterator};
 use crate::elements::start_element::Tag;
 use crate::selectors::format_css_request;
+use crate::tag_iterator::{Elements, TagIterator};
 
 use crate::selectors::HtmlSelectorCounter;
 use crate::selectors::HtmlSelectorFindFirst;
 
-
 pub struct TagNameHtmlSelector {
     tag_name_path: Vec<String>,
     tag_name_path_string: String,
-
-    find_first_position: Option<usize>,
 }
 
 impl TagNameHtmlSelector {
@@ -18,7 +15,6 @@ impl TagNameHtmlSelector {
         TagNameHtmlSelector {
             tag_name_path: Vec::new(),
             tag_name_path_string: String::new(),
-            find_first_position: None,
         }
     }
 
@@ -86,10 +82,11 @@ impl HtmlSelectorCounter<&str> for TagNameHtmlSelector {
     }
 }
 
-impl HtmlSelectorFindFirst for TagNameHtmlSelector {
+impl HtmlSelectorFindFirst<&str> for TagNameHtmlSelector {
     fn find_first(&mut self, html: &str, css_requests: &[&str]) -> String {
         let css_requests = format_css_request(css_requests);
         let mut text = String::new();
+        let mut find_first_position = None;
 
         let tag_iterator = TagIterator::new(html);
 
@@ -101,11 +98,11 @@ impl HtmlSelectorFindFirst for TagNameHtmlSelector {
                         // get begin and end position of the tag in the
                         // then, if the next decrease the path with the ending tag,
                         // so we have all tag position
-                        self.find_first_position = Some(end);
+                        find_first_position = Some(end);
                     }
                 }
-                Elements::End(_, begin, end) => {
-                    if let Some(position) = self.find_first_position {
+                Elements::End(_, begin, _end) => {
+                    if let Some(position) = find_first_position {
                         let content = html.get(position..begin);
                         if let Some(content) = content {
                             text.push_str(content);
