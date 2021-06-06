@@ -16,7 +16,7 @@ fn is_element_like(html: &str, start: &str, expected_smallest_length: usize) -> 
 
     let actual_start = html.get(0..start.len());
 
-    let is_start =  actual_start.is_some() && actual_start.unwrap().eq_ignore_ascii_case(start);
+    let is_start = actual_start.is_some() && actual_start.unwrap().eq_ignore_ascii_case(start);
 
     has_smallest_length_possible && is_start
 }
