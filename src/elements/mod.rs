@@ -2,6 +2,7 @@ pub mod comment_element;
 pub mod end_element;
 pub mod start_element;
 pub mod text_element;
+pub mod doctype_element;
 mod utils;
 
 pub trait Element<T> {

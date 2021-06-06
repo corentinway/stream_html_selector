@@ -1,6 +1,7 @@
 use crate::elements::{
     comment_element::CommentElement, end_element::EndElement, start_element::Tag,
     text_element::TextElement, Element,
+    doctype_element::DoctypeElement
 };
 
 #[derive(PartialEq, Debug)]
@@ -9,6 +10,7 @@ pub enum Elements {
     End(String, usize, usize),
     Comment(String),
     Text(String),
+    Doctype(String),
 }
 
 pub struct TagIterator<'a> {
@@ -55,6 +57,9 @@ impl Iterator for TagIterator<'_> {
         } else if let Some(text_element) = TextElement::extract(self.html) {
             self.reduce_html(text_element.length);
             Some(Elements::Text(text_element.content))
+        } else if let Some(doctype_element) = DoctypeElement::extract(self.html) {
+            self.reduce_html(doctype_element.length);
+            Some(Elements::Doctype(doctype_element.content))
         } else {
             None
         }
@@ -233,5 +238,38 @@ mod tag_iterator_tests {
         );
 
         assert_eq!(None, tag_iterator.next());
+    }
+
+    #[test]
+    fn should_read_doctype_and_html_tag() {
+        let html = r#"
+            <!doctype html>
+            <html>
+                <p>Hello World!</p>
+            </html>
+        "#;
+        let mut tag_iterator = TagIterator::new(html);
+
+        let next = tag_iterator.next().unwrap();
+        assert_eq!(Elements::Text("\n            ".to_string()), next);
+
+        let next = tag_iterator.next().unwrap();
+        assert_eq!(Elements::Doctype(" html".to_string()), next);
+
+        let next = tag_iterator.next().unwrap();
+        assert_eq!(Elements::Text("\n            ".to_string()), next);
+
+        let next = tag_iterator.next().unwrap();
+        let tag = Tag {
+            name: String::from("html"),
+            attributes: HashMap::new(),
+            length: 6,
+            is_autoclosing: false,
+        };
+        assert_eq!(Elements::Start(tag, 41, 47), next);
+        
+        let next = tag_iterator.next().unwrap();
+        assert_eq!(Elements::Text("\n                ".to_string()), next);
+
     }
 }

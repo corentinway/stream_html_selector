@@ -1,7 +1,7 @@
 use crate::elements::utils::extract_multiline_element_like;
 
 /// Parse an starting HTML tag like `<div id'foo' class="bar" hidden aria-label='baz'>`
-fn extract_comment_tag_name(html: &str) -> (String, usize) {
+fn extract_comment_content(html: &str) -> (String, usize) {
     extract_multiline_element_like(html, "<!--", "-->")
 }
 
@@ -44,7 +44,7 @@ pub struct CommentElement {
 impl Element<CommentElement> for CommentElement {
     fn extract(html: &str) -> Option<CommentElement> {
         if is_comment_element(html) {
-            let (content, length) = extract_comment_tag_name(html);
+            let (content, length) = extract_comment_content(html);
             Some(CommentElement { content, length })
         } else {
             None
