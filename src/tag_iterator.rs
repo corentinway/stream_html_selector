@@ -1,7 +1,6 @@
 use crate::elements::{
-    comment_element::CommentElement, end_element::EndElement, start_element::Tag,
-    text_element::TextElement, Element,
-    doctype_element::DoctypeElement
+    comment_element::CommentElement, doctype_element::DoctypeElement, end_element::EndElement,
+    start_element::Tag, text_element::TextElement, Element,
 };
 
 #[derive(PartialEq, Debug)]
@@ -267,9 +266,8 @@ mod tag_iterator_tests {
             is_autoclosing: false,
         };
         assert_eq!(Elements::Start(tag, 41, 47), next);
-        
+
         let next = tag_iterator.next().unwrap();
         assert_eq!(Elements::Text("\n                ".to_string()), next);
-
     }
 }
