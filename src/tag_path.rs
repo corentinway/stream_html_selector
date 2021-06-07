@@ -1,6 +1,13 @@
 use crate::elements::start_element::Tag;
 
 
+
+pub struct TagPathItem<'a> {
+    tag: &'a Tag,
+    nth_child: usize
+}
+
+
 fn match_tag_path<F>(tag_path: Vec<Tag>, css_selector: Vec<F>) -> bool
 where
     F: Fn(&Tag) -> bool,
