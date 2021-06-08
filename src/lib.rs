@@ -6,6 +6,8 @@ mod tag_parser;
 
 mod elements;
 
+mod css_selector_macro;
+
 use elements::start_element::extract_tag_name;
 use elements::start_element::Tag;
 use selectors::tag_name_html_selector::TagNameHtmlSelector;

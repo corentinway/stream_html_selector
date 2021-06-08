@@ -22,6 +22,14 @@ pub fn class_predicate(class: String) -> impl Fn(&Tag) -> bool {
     }
 }
 
+pub fn and_predicate(predicates: Vec<impl Fn(&Tag) -> bool> ) -> impl Fn(&Tag) -> bool {
+    move |tag: &Tag| {
+        predicates
+            .iter()
+            .fold( true, |acc, predicate| acc && predicate(&tag))
+    }
+}
+
 #[cfg(test)]
 mod test_selectors {
 
@@ -77,5 +85,26 @@ mod test_selectors {
 
         assert!(does_match);
     }
+    #[test]
+    fn should_match_a_tag_with_2_predicates() {
+        let mut map = HashMap::new();
+        map.insert("id".to_string(), "foo".to_string());
+        let tag = Tag {
+            name: String::from("div"),
+            attributes: map,
+            length: 5, // FAKE
+            is_autoclosing: false,
+        };
+
+        let tag_name_matcher = tag_name_predicate(String::from("div"));
+        let id_matcher = id_predicate(String::from("foo"));
+
+        let matcher = and_predicate(vec![tag_name_matcher, id_matcher]);
+
+        let does_match = matcher(&tag);
+
+        assert!(does_match);
+    }
   
 }
+
