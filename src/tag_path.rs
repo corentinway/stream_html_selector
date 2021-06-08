@@ -1,12 +1,9 @@
 use crate::elements::start_element::Tag;
 
-
-
 pub struct TagPathItem<'a> {
     tag: &'a Tag,
-    nth_child: usize
+    nth_child: usize,
 }
-
 
 fn match_tag_path<F>(tag_path: Vec<Tag>, css_selector: Vec<F>) -> bool
 where
@@ -45,15 +42,12 @@ where
     }
 }
 
-
-
 #[cfg(test)]
 mod test_tag_path {
 
     use super::*;
-    use std::collections::HashMap;
     use crate::selector::*;
-
+    use std::collections::HashMap;
 
     fn build_tag_with_attribute(name: &str, attribute_key: &str, attribute_value: &str) -> Tag {
         let mut map = HashMap::new();

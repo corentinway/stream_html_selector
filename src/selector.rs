@@ -1,33 +1,39 @@
 use crate::elements::start_element::Tag;
 
-pub fn tag_name_predicate(name: String) -> impl Fn(&Tag) -> bool {
-    move |tag: &Tag| tag.name == name
+pub fn tag_name_predicate(name: String) -> Box<dyn Fn(&Tag) -> bool> {
+    Box::new(move |tag: &Tag| tag.name == name)
 }
 
-pub fn id_predicate(id: String) -> impl Fn(&Tag) -> bool {
-    move |tag: &Tag| {
+pub fn id_predicate(id: String) -> Box<dyn Fn(&Tag) -> bool> {
+    Box::new(move |tag: &Tag| {
         if let Some(actual_id) = tag.id() {
             return *actual_id == id;
         }
         false
-    }
+    })
 }
 
-pub fn class_predicate(class: String) -> impl Fn(&Tag) -> bool {
-    move |tag: &Tag| {
+pub fn class_predicate(class: String) -> Box<dyn Fn(&Tag) -> bool> {
+    Box::new(move |tag: &Tag| {
         if let Some(actual_classes) = tag.classes() {
             return actual_classes.contains(class.as_str());
         }
         false
-    }
+    })
 }
 
-pub fn and_predicate(predicates: Vec<impl Fn(&Tag) -> bool> ) -> impl Fn(&Tag) -> bool {
-    move |tag: &Tag| {
+pub fn has_attribute_predicate(attribute_name: String) -> Box<dyn Fn(&Tag) -> bool> {
+    Box::new(move |tag: &Tag| {
+        tag.attributes.get(&attribute_name).is_some()
+    })
+}
+
+pub fn and_predicate(predicates: Vec<Box<dyn Fn(&Tag) -> bool>>) -> Box<dyn Fn(&Tag) -> bool> {
+    Box::new(move |tag: &Tag| {
         predicates
             .iter()
-            .fold( true, |acc, predicate| acc && predicate(&tag))
-    }
+            .fold(true, |acc, predicate| acc && predicate(&tag))
+    })
 }
 
 #[cfg(test)]
@@ -105,6 +111,21 @@ mod test_selectors {
 
         assert!(does_match);
     }
-  
-}
+    #[test]
+    fn should_match_a_tag_with_attribute() {
+        let mut map = HashMap::new();
+        map.insert("hidden".to_string(), "true".to_string());
+        let tag = Tag {
+            name: String::from("div"),
+            attributes: map,
+            length: 5, // FAKE
+            is_autoclosing: false,
+        };
 
+        let matcher = has_attribute_predicate(String::from("hidden"));
+
+        let does_match = matcher(&tag);
+
+        assert!(does_match);
+    }
+}

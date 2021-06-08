@@ -1,8 +1,8 @@
 mod selector;
 mod selectors;
-mod tag_path;
 mod tag_iterator;
 mod tag_parser;
+mod tag_path;
 
 mod elements;
 
