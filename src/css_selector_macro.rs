@@ -10,24 +10,24 @@ tag_name_predicate("div".to_string())
 #[macro_export]
 macro_rules! css_selector {
     ($tag_name: tt) => {
-        crate::selector::tag_name_predicate(String::from(stringify!($tag_name)))
+        crate::selector_predicates::tag_name_predicate(String::from(stringify!($tag_name)))
     };
     ($tag_name:tt # $id:tt) => {
-        crate::selector::and_predicate(vec![
-            crate::selector::tag_name_predicate(String::from(stringify!($tag_name))),
-            crate::selector::id_predicate(String::from(stringify!($id))),
+        crate::selector_predicates::and_predicate(vec![
+            crate::selector_predicates::tag_name_predicate(String::from(stringify!($tag_name))),
+            crate::selector_predicates::id_predicate(String::from(stringify!($id))),
         ])
     };
     ($tag_name:tt . $class:tt) => {
-        crate::selector::and_predicate(vec![
-            crate::selector::tag_name_predicate(String::from(stringify!($tag_name))),
-            crate::selector::class_predicate(String::from(stringify!($class))),
+        crate::selector_predicates::and_predicate(vec![
+            crate::selector_predicates::tag_name_predicate(String::from(stringify!($tag_name))),
+            crate::selector_predicates::class_predicate(String::from(stringify!($class))),
         ])
     };
     ($tag_name:tt [$attribute_name:tt]) => {
-        crate::selector::and_predicate(vec![
-            crate::selector::tag_name_predicate(String::from(stringify!($tag_name))),
-            crate::selector::has_attribute_predicate(String::from(stringify!($attribute_name))),
+        crate::selector_predicates::and_predicate(vec![
+            crate::selector_predicates::tag_name_predicate(String::from(stringify!($tag_name))),
+            crate::selector_predicates::has_attribute_predicate(String::from(stringify!($attribute_name))),
         ])
     };
 }

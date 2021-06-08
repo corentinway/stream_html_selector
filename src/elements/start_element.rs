@@ -6,7 +6,7 @@ fn is_start_element(html: &str) -> bool {
     is_element_like(html, "<", 3)
 }
 
-use crate::tag_parser::TagParser;
+use crate::elements::tag_parser::TagParser;
 use std::cmp;
 use std::collections::HashMap;
 

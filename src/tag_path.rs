@@ -46,7 +46,7 @@ where
 mod test_tag_path {
 
     use super::*;
-    use crate::selector::*;
+    use crate::selector_predicates::*;
     use std::collections::HashMap;
 
     fn build_tag_with_attribute(name: &str, attribute_key: &str, attribute_value: &str) -> Tag {

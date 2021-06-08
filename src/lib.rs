@@ -1,7 +1,6 @@
-mod selector;
+mod selector_predicates;
 mod selectors;
 mod tag_iterator;
-mod tag_parser;
 mod tag_path;
 
 mod elements;
