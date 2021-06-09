@@ -1,12 +1,7 @@
-/*
+macro_rules! assert_is_dollar  {
+    ( $ ) => ();
+}
 
-- `css_selector!( div )` will lead to generate
-
-```rust
-tag_name_predicate("div".to_string())
-
-
-*/
 #[macro_export]
 macro_rules! css_selector {
     ($tag_name: tt) => {
@@ -48,7 +43,8 @@ macro_rules! css_selector {
             ),
         ])
     };
-    ($tag_name:tt [$attribute_name:tt $= $attribute_value:literal ]) => {
+    ($tag_name:tt [$attribute_name:tt $dollar:tt = $attribute_value:literal ]) => {
+        //assert_is_dollar!( $dollar );
         crate::selector_predicates::and_predicate(vec![
             crate::selector_predicates::tag_name_predicate(String::from(stringify!($tag_name))),
             crate::selector_predicates::attribute_ends_with_predicate(
@@ -58,6 +54,9 @@ macro_rules! css_selector {
         ])
     };
 }
+
+
+
 
 #[cfg(test)]
 mod test_css_selector_macro {
@@ -194,7 +193,6 @@ mod test_css_selector_macro {
         assert!(matcher(&matched_tag));
         assert!(!matcher(&unmatched_tag));
     }
-    
     #[test]
     fn should_test_macro_given_tag_name_and_attribute_ends_with_vallue() {
         let mut map = HashMap::new();
@@ -217,4 +215,6 @@ mod test_css_selector_macro {
         assert!(matcher(&matched_tag));
         assert!(!matcher(&unmatched_tag));
     }
+    
+
 }
