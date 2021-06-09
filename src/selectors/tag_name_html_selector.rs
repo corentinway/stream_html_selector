@@ -5,9 +5,12 @@ use crate::tag_iterator::{Elements, TagIterator};
 use crate::selectors::HtmlSelectorCounter;
 use crate::selectors::HtmlSelectorFindFirst;
 
+//use crate::tag_path::TagPathItem;
+
 pub struct TagNameHtmlSelector {
     tag_name_path: Vec<String>,
     tag_name_path_string: String,
+    //path: Vec<TagPathItem>,
 }
 
 impl TagNameHtmlSelector {
@@ -15,6 +18,7 @@ impl TagNameHtmlSelector {
         TagNameHtmlSelector {
             tag_name_path: Vec::new(),
             tag_name_path_string: String::new(),
+           // path: Vec::new()
         }
     }
 
@@ -46,9 +50,15 @@ impl TagNameHtmlSelector {
         self.tag_name_path_string = self.tag_name_path.join(" ");
     }
 
-    fn increase_path(&mut self, tag_name: String) {
-        self.tag_name_path.push(tag_name);
+    fn increase_path(&mut self, tag: Box<Tag>) {
+        self.tag_name_path.push(tag.name.clone()); // FIXME
         self.tag_name_path_string = self.tag_name_path.join(" ");
+        /*let item = TagPathItem {
+            tag,
+            nth_child:0 // FIXME
+        };
+       // self.path.push( item );
+       */
     }
 }
 
@@ -63,9 +73,10 @@ impl HtmlSelectorCounter<&str> for TagNameHtmlSelector {
 
             match element {
                 Elements::Start(tag, _begin, _end) => {
-                    self.increase_path(tag.name);
+                    let is_autoclosing = tag.is_autoclosing;
+                    self.increase_path(Box::new(tag));
                     self.search_for_css(&css_requests, &mut counts);
-                    if tag.is_autoclosing {
+                    if is_autoclosing {
                         self.reduce_path();
                     }
                 }
@@ -93,7 +104,7 @@ impl HtmlSelectorFindFirst<&str> for TagNameHtmlSelector {
         for element in tag_iterator {
             match element {
                 Elements::Start(tag, begin, end) => {
-                    self.increase_path(tag.name);
+                    self.increase_path(Box::new(tag));
                     if let Some(index) = self.does_match_css_request(&css_requests) {
                         // get begin and end position of the tag in the
                         // then, if the next decrease the path with the ending tag,

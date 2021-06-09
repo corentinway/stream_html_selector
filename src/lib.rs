@@ -1,10 +1,11 @@
-mod selector;
+mod selector_predicates;
 mod selectors;
-mod tag_path;
 mod tag_iterator;
-mod tag_parser;
+mod tag_path;
 
 mod elements;
+
+mod css_selector_macro;
 
 use elements::start_element::extract_tag_name;
 use elements::start_element::Tag;

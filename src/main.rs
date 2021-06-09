@@ -1,7 +1,6 @@
 mod elements;
 mod selectors;
 mod tag_iterator;
-mod tag_parser;
 
 use crate::selectors::tag_name_html_selector::TagNameHtmlSelector;
 use crate::selectors::HtmlSelectorCounter;

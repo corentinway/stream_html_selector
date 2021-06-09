@@ -3,6 +3,7 @@ pub mod doctype_element;
 pub mod end_element;
 pub mod start_element;
 pub mod text_element;
+pub mod tag_parser;
 mod utils;
 
 pub trait Element<T> {
