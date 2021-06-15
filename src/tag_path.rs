@@ -5,7 +5,7 @@ pub struct TagPathItem {
     pub nth_child: usize,
 }
 
-fn match_tag_path<F>(tag_path: Vec<Tag>, css_selector: Vec<F>) -> bool
+pub fn match_tag_path<F>(tag_path: Vec<Tag>, css_selector: Vec<F>) -> bool
 where
     F: Fn(&Tag) -> bool,
 {
@@ -46,7 +46,7 @@ where
 mod test_tag_path {
 
     use super::*;
-    use crate::selector_predicates::*;
+    use crate::selectors::selector_predicates::*;
     use std::collections::HashMap;
 
     fn build_tag_with_attribute(name: &str, attribute_key: &str, attribute_value: &str) -> Tag {

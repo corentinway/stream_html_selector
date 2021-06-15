@@ -5,12 +5,13 @@ use crate::tag_iterator::{Elements, TagIterator};
 use crate::selectors::HtmlSelectorCounter;
 use crate::selectors::HtmlSelectorFindFirst;
 
-//use crate::tag_path::TagPathItem;
+use crate::tag_path::TagPathItem;
+
 
 pub struct TagNameHtmlSelector {
     tag_name_path: Vec<String>,
     tag_name_path_string: String,
-    //path: Vec<TagPathItem>,
+    path: Vec<TagPathItem>,
 }
 
 impl TagNameHtmlSelector {
@@ -18,7 +19,7 @@ impl TagNameHtmlSelector {
         TagNameHtmlSelector {
             tag_name_path: Vec::new(),
             tag_name_path_string: String::new(),
-           // path: Vec::new()
+            path: Vec::new()
         }
     }
 
@@ -48,17 +49,18 @@ impl TagNameHtmlSelector {
     fn reduce_path(&mut self) {
         self.tag_name_path.pop();
         self.tag_name_path_string = self.tag_name_path.join(" ");
+        self.path.pop();
     }
 
     fn increase_path(&mut self, tag: Box<Tag>) {
         self.tag_name_path.push(tag.name.clone()); // FIXME
         self.tag_name_path_string = self.tag_name_path.join(" ");
-        /*let item = TagPathItem {
+        let item = TagPathItem {
             tag,
             nth_child:0 // FIXME
         };
-       // self.path.push( item );
-       */
+       self.path.push( item );
+       
     }
 }
 
@@ -92,6 +94,7 @@ impl HtmlSelectorCounter<&str> for TagNameHtmlSelector {
         counts
     }
 }
+
 
 impl HtmlSelectorFindFirst<&str> for TagNameHtmlSelector {
     fn find_first(&mut self, html: &str, css_requests: &[&str]) -> String {

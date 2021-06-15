@@ -1,9 +1,6 @@
-mod elements;
-mod selectors;
-mod tag_iterator;
 
-use crate::selectors::tag_name_html_selector::TagNameHtmlSelector;
-use crate::selectors::HtmlSelectorCounter;
+use stream_html_selector::count;
+
 use std::fs;
 use std::time::Instant;
 
@@ -13,10 +10,10 @@ fn main() {
 
     let css_request = vec!["td"];
 
-    let mut html_selector = TagNameHtmlSelector::new();
+    
 
     let now = Instant::now();
-    let count = html_selector.count(&html, &css_request);
+    let count = count(html.as_str(), &css_request);
 
     println!("Parsing execution time: {} ms", now.elapsed().as_millis());
 
