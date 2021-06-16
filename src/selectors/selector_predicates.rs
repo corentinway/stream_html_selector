@@ -23,12 +23,13 @@ pub fn class_predicate(class: String) -> Box<dyn Fn(&Tag) -> bool> {
 }
 
 pub fn has_attribute_predicate(attribute_name: String) -> Box<dyn Fn(&Tag) -> bool> {
-    Box::new(move |tag: &Tag| {
-        tag.attributes.get(&attribute_name).is_some()
-    })
+    Box::new(move |tag: &Tag| tag.attributes.get(&attribute_name).is_some())
 }
 
-pub fn attribute_equals_predicate(attribute_name: String, attribute_value: String) -> Box<dyn Fn(&Tag) -> bool> {
+pub fn attribute_equals_predicate(
+    attribute_name: String,
+    attribute_value: String,
+) -> Box<dyn Fn(&Tag) -> bool> {
     Box::new(move |tag: &Tag| {
         if let Some(actual_attribute_value) = tag.attributes.get(&attribute_name) {
             return actual_attribute_value.eq(&attribute_value);
@@ -37,7 +38,10 @@ pub fn attribute_equals_predicate(attribute_name: String, attribute_value: Strin
     })
 }
 
-pub fn attribute_starts_with_predicate(attribute_name: String, attribute_value: String) -> Box<dyn Fn(&Tag) -> bool> {
+pub fn attribute_starts_with_predicate(
+    attribute_name: String,
+    attribute_value: String,
+) -> Box<dyn Fn(&Tag) -> bool> {
     Box::new(move |tag: &Tag| {
         if let Some(actual_attribute_value) = tag.attributes.get(&attribute_name) {
             return actual_attribute_value.starts_with(&attribute_value);
@@ -46,7 +50,10 @@ pub fn attribute_starts_with_predicate(attribute_name: String, attribute_value: 
     })
 }
 
-pub fn attribute_ends_with_predicate(attribute_name: String, attribute_value: String) -> Box<dyn Fn(&Tag) -> bool> {
+pub fn attribute_ends_with_predicate(
+    attribute_name: String,
+    attribute_value: String,
+) -> Box<dyn Fn(&Tag) -> bool> {
     Box::new(move |tag: &Tag| {
         if let Some(actual_attribute_value) = tag.attributes.get(&attribute_name) {
             return actual_attribute_value.ends_with(&attribute_value);
@@ -55,7 +62,10 @@ pub fn attribute_ends_with_predicate(attribute_name: String, attribute_value: St
     })
 }
 
-pub fn attribute_contains_with_predicate(attribute_name: String, attribute_value: String) -> Box<dyn Fn(&Tag) -> bool> {
+pub fn attribute_contains_with_predicate(
+    attribute_name: String,
+    attribute_value: String,
+) -> Box<dyn Fn(&Tag) -> bool> {
     Box::new(move |tag: &Tag| {
         if let Some(actual_attribute_value) = tag.attributes.get(&attribute_name) {
             return actual_attribute_value.contains(&attribute_value);
@@ -63,12 +73,15 @@ pub fn attribute_contains_with_predicate(attribute_name: String, attribute_value
         false
     })
 }
-pub fn attribute_has_word_predicate(attribute_name: String, word: String) -> Box<dyn Fn(&Tag) -> bool> {
+pub fn attribute_has_word_predicate(
+    attribute_name: String,
+    word: String,
+) -> Box<dyn Fn(&Tag) -> bool> {
     Box::new(move |tag: &Tag| {
         if let Some(actual_attribute_value) = tag.attributes.get(&attribute_name) {
-            return actual_attribute_value.starts_with(&format!("{} ", &word)) ||
-            actual_attribute_value.contains(&format!(" {} ", &word)) ||
-            actual_attribute_value.ends_with(&format!(" {}", &word));
+            return actual_attribute_value.starts_with(&format!("{} ", &word))
+                || actual_attribute_value.contains(&format!(" {} ", &word))
+                || actual_attribute_value.ends_with(&format!(" {}", &word));
         }
         false
     })
@@ -264,10 +277,9 @@ mod test_selectors {
         assert!(does_match);
     }
 
-
     // X:not(selector)
     // X::pseudoElement
-    // X:nth-child(n)    
+    // X:nth-child(n)
     // X:nth-last-child(n)
     // X:nth-of-type(n)
     // X:nth-last-of-type(n)
@@ -276,5 +288,4 @@ mod test_selectors {
     // X:only-child
     // X:only-of-type
     // X:first-of-type
-
 }

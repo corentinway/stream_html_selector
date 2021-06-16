@@ -4,8 +4,6 @@ use crate::selectors::HtmlSelectorFindFirst;
 use crate::tag_iterator::Elements;
 use crate::tag_iterator::TagIterator;
 
-
-
 struct MatcherHtmlSelector {}
 impl MatcherHtmlSelector {
     fn new() -> Self {
@@ -76,8 +74,6 @@ mod test_matcher_selector {
     use crate::css_selector;
 
     use super::*;
-    
-
 
     use std::fs;
 

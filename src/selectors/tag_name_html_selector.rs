@@ -7,7 +7,6 @@ use crate::selectors::HtmlSelectorFindFirst;
 
 use crate::tag_path::TagPathItem;
 
-
 pub struct TagNameHtmlSelector {
     tag_name_path: Vec<String>,
     tag_name_path_string: String,
@@ -19,7 +18,7 @@ impl TagNameHtmlSelector {
         TagNameHtmlSelector {
             tag_name_path: Vec::new(),
             tag_name_path_string: String::new(),
-            path: Vec::new()
+            path: Vec::new(),
         }
     }
 
@@ -57,10 +56,9 @@ impl TagNameHtmlSelector {
         self.tag_name_path_string = self.tag_name_path.join(" ");
         let item = TagPathItem {
             tag,
-            nth_child:0 // FIXME
+            nth_child: 0, // FIXME
         };
-       self.path.push( item );
-       
+        self.path.push(item);
     }
 }
 
@@ -94,7 +92,6 @@ impl HtmlSelectorCounter<&str> for TagNameHtmlSelector {
         counts
     }
 }
-
 
 impl HtmlSelectorFindFirst<&str> for TagNameHtmlSelector {
     fn find_first(&mut self, html: &str, css_requests: &[&str]) -> String {

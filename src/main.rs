@@ -1,4 +1,3 @@
-
 use stream_html_selector::count;
 
 use std::fs;
@@ -9,8 +8,6 @@ fn main() {
     let html = fs::read_to_string(filename).unwrap();
 
     let css_request = vec!["td"];
-
-    
 
     let now = Instant::now();
     let count = count(html.as_str(), &css_request);

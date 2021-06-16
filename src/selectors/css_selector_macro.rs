@@ -1,11 +1,13 @@
-macro_rules! assert_is_dollar  {
-    ( $ ) => ();
+macro_rules! assert_is_dollar {
+    ( $ ) => {};
 }
 
 #[macro_export]
 macro_rules! css_selector {
     ($tag_name: tt) => {
-        crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!($tag_name)))
+        crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+            $tag_name
+        )))
     };
     // ID Selectors
     (# $id:tt) => {
@@ -13,7 +15,9 @@ macro_rules! css_selector {
     };
     ($tag_name:tt # $id:tt) => {
         crate::selectors::selector_predicates::and_predicate(vec![
-            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!($tag_name))),
+            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+                $tag_name
+            ))),
             crate::selectors::selector_predicates::id_predicate(String::from(stringify!($id))),
         ])
     };
@@ -24,50 +28,61 @@ macro_rules! css_selector {
     };
     ($tag_name:tt . $class:tt) => {
         crate::selectors::selector_predicates::and_predicate(vec![
-            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!($tag_name))),
-            crate::selectors::selector_predicates::class_predicate(String::from(stringify!($class))),
+            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+                $tag_name
+            ))),
+            crate::selectors::selector_predicates::class_predicate(String::from(stringify!(
+                $class
+            ))),
         ])
     };
 
     // ATTRIBUTE Selectors
     ($tag_name:tt [$attribute_name:tt]) => {
         crate::selectors::selector_predicates::and_predicate(vec![
-            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!($tag_name))),
-            crate::selectors::selector_predicates::has_attribute_predicate(String::from(stringify!($attribute_name))),
+            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+                $tag_name
+            ))),
+            crate::selectors::selector_predicates::has_attribute_predicate(String::from(
+                stringify!($attribute_name),
+            )),
         ])
     };
     ($tag_name:tt [$attribute_name:tt = $attribute_value:literal ]) => {
         crate::selectors::selector_predicates::and_predicate(vec![
-            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!($tag_name))),
+            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+                $tag_name
+            ))),
             crate::selectors::selector_predicates::attribute_equals_predicate(
-                String::from(stringify!($attribute_name)), 
-                String::from($attribute_value)
+                String::from(stringify!($attribute_name)),
+                String::from($attribute_value),
             ),
         ])
     };
     ($tag_name:tt [$attribute_name:tt ^= $attribute_value:literal ]) => {
         crate::selectors::selector_predicates::and_predicate(vec![
-            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!($tag_name))),
+            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+                $tag_name
+            ))),
             crate::selectors::selector_predicates::attribute_starts_with_predicate(
-                String::from(stringify!($attribute_name)), 
-                String::from($attribute_value)
+                String::from(stringify!($attribute_name)),
+                String::from($attribute_value),
             ),
         ])
     };
     ($tag_name:tt [$attribute_name:tt $dollar:tt = $attribute_value:literal ]) => {
         //assert_is_dollar!( $dollar );
         crate::selectors::selector_predicates::and_predicate(vec![
-            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!($tag_name))),
+            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+                $tag_name
+            ))),
             crate::selectors::selector_predicates::attribute_ends_with_predicate(
-                String::from(stringify!($attribute_name)), 
-                String::from($attribute_value)
+                String::from(stringify!($attribute_name)),
+                String::from($attribute_value),
             ),
         ])
     };
 }
-
-
-
 
 #[cfg(test)]
 mod test_css_selector_macro {
@@ -221,7 +236,7 @@ mod test_css_selector_macro {
             length: 0, // FAKE
         };
 
-        let matcher = css_selector!(div[class="foo"]);
+        let matcher = css_selector!(div[class = "foo"]);
 
         assert!(matcher(&matched_tag));
         assert!(!matcher(&unmatched_tag));
@@ -243,7 +258,7 @@ mod test_css_selector_macro {
             length: 0, // FAKE
         };
 
-        let matcher = css_selector!(div[class^="foo"]);
+        let matcher = css_selector!(div[class ^= "foo"]);
 
         assert!(matcher(&matched_tag));
         assert!(!matcher(&unmatched_tag));
@@ -270,6 +285,4 @@ mod test_css_selector_macro {
         assert!(matcher(&matched_tag));
         assert!(!matcher(&unmatched_tag));
     }
-    
-
 }
