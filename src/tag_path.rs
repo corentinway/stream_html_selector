@@ -34,6 +34,8 @@ where
     if selector(tag) {
         if tag_index == 0 && selector_index == 0 {
             true
+        } else if selector_index == 0 {
+            true
         } else {
             match_tag_path_index(tag_path, tag_index - 1, css_selector, selector_index - 1)
         }
@@ -109,5 +111,19 @@ mod test_tag_path {
         let does_match = match_tag_path(tag_path, &css_selector);
 
         assert!(!does_match);
+    }
+    #[test]
+    fn should_match_given_a_css_selector_sorter_than_the_tag_path() {
+        let html_tag = &build_tag("html");
+        let body_tag = &build_tag("body");
+        let table_tag = &build_tag("table");
+        let tbody_tag = &build_tag("tbody");
+        let tag_path = vec![html_tag, body_tag, table_tag, tbody_tag];
+
+        let css_selector = vec![css_selector!(table), css_selector!(tbody)];
+
+        let does_match = match_tag_path(tag_path, &css_selector);
+
+        assert!(does_match)
     }
 }
