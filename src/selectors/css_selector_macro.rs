@@ -1,7 +1,12 @@
+//! We define a macro that return a predicate that match a CSS selector
+
+
+
 macro_rules! assert_is_dollar {
     ( $ ) => {};
 }
 
+/// Macro that return a predicate that match a CSS selector
 #[macro_export]
 macro_rules! css_selector {
     ($tag_name: tt) => {
@@ -86,203 +91,106 @@ macro_rules! css_selector {
 
 #[cfg(test)]
 mod test_css_selector_macro {
-    use crate::elements::start_element::Tag;
+    use crate::elements::{Element, start_element::Tag};
     use std::collections::HashMap;
+    use crate::tag_path::TagPathItem;
+
+    fn create_tag(html: &str) -> TagPathItem {
+        let tag = Tag::extract(html).expect("invalid HTML code to create tag in the tests");
+        TagPathItem {
+            tag: Box::new(tag),
+            nth_child: 0,
+        }
+    }
 
     #[test]
     fn should_test_macro_given_tag_name() {
-        let matched_tag = Tag {
-            name: "div".to_string(),
-            attributes: HashMap::new(),
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
-        let unmatched_tag = Tag {
-            name: "h1".to_string(),
-            attributes: HashMap::new(),
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
+        let matched_tag_path_item = create_tag("<div>");
+        let unmatched_tag_path_item = create_tag("<h1>");
 
         let matcher = css_selector!(div);
 
-        assert!(matcher(&matched_tag));
-        assert!(!matcher(&unmatched_tag));
+        assert!(matcher(&matched_tag_path_item));
+        assert!(!matcher(&unmatched_tag_path_item));
     }
     #[test]
     fn should_test_macro_given_tag_name_and_id() {
-        let mut map = HashMap::new();
-        map.insert(String::from("id"), String::from("foo"));
-        let matched_tag = Tag {
-            name: "div".to_string(),
-            attributes: map,
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
-        let unmatched_tag = Tag {
-            name: "h1".to_string(),
-            attributes: HashMap::new(),
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
+        let matched_tag_path_item = create_tag("<div id='foo'>");
+        let unmatched_tag_path_item = create_tag("<h1>");
 
         let matcher = css_selector!(div#foo);
 
-        assert!(matcher(&matched_tag));
-        assert!(!matcher(&unmatched_tag));
+        assert!(matcher(&matched_tag_path_item));
+        assert!(!matcher(&unmatched_tag_path_item));
     }
     #[test]
     fn should_test_macro_given_only_id() {
-        let mut map = HashMap::new();
-        map.insert(String::from("id"), String::from("foo"));
-        let matched_tag = Tag {
-            name: "div".to_string(),
-            attributes: map,
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
-        let unmatched_tag = Tag {
-            name: "h1".to_string(),
-            attributes: HashMap::new(),
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
+        let matched_tag_path_item = create_tag("<div id='foo'>");
+        let unmatched_tag_path_item = create_tag("<h1>");
 
         let matcher = css_selector!(#foo);
 
-        assert!(matcher(&matched_tag));
-        assert!(!matcher(&unmatched_tag));
+        assert!(matcher(&matched_tag_path_item));
+        assert!(!matcher(&unmatched_tag_path_item));
     }
     #[test]
     fn should_test_macro_given_tag_name_and_class() {
-        let mut map = HashMap::new();
-        map.insert(String::from("class"), String::from("foo"));
-        let matched_tag = Tag {
-            name: "div".to_string(),
-            attributes: map,
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
-        let unmatched_tag = Tag {
-            name: "h1".to_string(),
-            attributes: HashMap::new(),
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
+        let matched_tag_path_item = create_tag("<div class='foo'>");
+        let unmatched_tag_path_item = create_tag("<h1>");
 
         let matcher = css_selector!(div.foo);
 
-        assert!(matcher(&matched_tag));
-        assert!(!matcher(&unmatched_tag));
+        assert!(matcher(&matched_tag_path_item));
+        assert!(!matcher(&unmatched_tag_path_item));
     }
     #[test]
     fn should_test_macro_given_only_class() {
-        let mut map = HashMap::new();
-        map.insert(String::from("class"), String::from("foo"));
-        let matched_tag = Tag {
-            name: "div".to_string(),
-            attributes: map,
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
-        let unmatched_tag = Tag {
-            name: "h1".to_string(),
-            attributes: HashMap::new(),
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
+        let matched_tag_path_item = create_tag("<div class='foo'>");
+        let unmatched_tag_path_item = create_tag("<h1>");
 
         let matcher = css_selector!(.foo);
 
-        assert!(matcher(&matched_tag));
-        assert!(!matcher(&unmatched_tag));
+        assert!(matcher(&matched_tag_path_item));
+        assert!(!matcher(&unmatched_tag_path_item));
     }
     #[test]
     fn should_test_macro_given_tag_name_and_attrbute() {
-        let mut map = HashMap::new();
-        map.insert(String::from("class"), String::from("foo"));
-        let matched_tag = Tag {
-            name: "div".to_string(),
-            attributes: map,
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
-        let unmatched_tag = Tag {
-            name: "h1".to_string(),
-            attributes: HashMap::new(),
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
+        let matched_tag_path_item = create_tag("<div class='foo'>");
+        let unmatched_tag_path_item = create_tag("<h1>");
 
         let matcher = css_selector!(div[class]);
 
-        assert!(matcher(&matched_tag));
-        assert!(!matcher(&unmatched_tag));
+        assert!(matcher(&matched_tag_path_item));
+        assert!(!matcher(&unmatched_tag_path_item));
     }
     #[test]
     fn should_test_macro_given_tag_name_and_attribute_equals_vallue() {
-        let mut map = HashMap::new();
-        map.insert(String::from("class"), String::from("foo"));
-        let matched_tag = Tag {
-            name: "div".to_string(),
-            attributes: map,
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
-        let unmatched_tag = Tag {
-            name: "h1".to_string(),
-            attributes: HashMap::new(),
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
+        let matched_tag_path_item = create_tag("<div class='foo'>");
+        let unmatched_tag_path_item = create_tag("<h1>");
 
         let matcher = css_selector!(div[class = "foo"]);
 
-        assert!(matcher(&matched_tag));
-        assert!(!matcher(&unmatched_tag));
+        assert!(matcher(&matched_tag_path_item));
+        assert!(!matcher(&unmatched_tag_path_item));
     }
     #[test]
     fn should_test_macro_given_tag_name_and_attribute_starts_with_vallue() {
-        let mut map = HashMap::new();
-        map.insert(String::from("class"), String::from("foo"));
-        let matched_tag = Tag {
-            name: "div".to_string(),
-            attributes: map,
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
-        let unmatched_tag = Tag {
-            name: "h1".to_string(),
-            attributes: HashMap::new(),
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
+        let matched_tag_path_item = create_tag("<div class='foo'>");
+        let unmatched_tag_path_item = create_tag("<h1>");
 
         let matcher = css_selector!(div[class ^= "foo"]);
 
-        assert!(matcher(&matched_tag));
-        assert!(!matcher(&unmatched_tag));
+        assert!(matcher(&matched_tag_path_item));
+        assert!(!matcher(&unmatched_tag_path_item));
     }
     #[test]
     fn should_test_macro_given_tag_name_and_attribute_ends_with_vallue() {
-        let mut map = HashMap::new();
-        map.insert(String::from("class"), String::from("foo"));
-        let matched_tag = Tag {
-            name: "div".to_string(),
-            attributes: map,
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
-        let unmatched_tag = Tag {
-            name: "h1".to_string(),
-            attributes: HashMap::new(),
-            is_autoclosing: false,
-            length: 0, // FAKE
-        };
+        let matched_tag_path_item = create_tag("<div class='foo'>");
+        let unmatched_tag_path_item = create_tag("<h1>");
 
         let matcher = css_selector!(div[class$="foo"]);
 
-        assert!(matcher(&matched_tag));
-        assert!(!matcher(&unmatched_tag));
+        assert!(matcher(&matched_tag_path_item));
+        assert!(!matcher(&unmatched_tag_path_item));
     }
 }

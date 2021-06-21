@@ -3,9 +3,11 @@ use crate::tag_iterator::Elements;
 use crate::tag_iterator::TagIterator;
 
 use crate::tag_path::match_tag_path;
+use crate::tag_path::TagPathItem;
+
 
 pub struct TagPathHtmlSelector {
-    path: Vec<Box<Tag>>,
+    path: Vec<Box<TagPathItem>>,
 }
 
 impl TagPathHtmlSelector {
@@ -13,13 +15,16 @@ impl TagPathHtmlSelector {
         TagPathHtmlSelector { path: Vec::new() }
     }
 
-    fn count(&mut self, html: &str, matchers: &Vec<&Vec<Box<dyn Fn(&Tag) -> bool>>>) -> Vec<usize> {
+    fn count(&mut self, html: &str, matchers: &Vec<&Vec<Box<dyn Fn(&TagPathItem) -> bool>>>) -> Vec<usize> {
         let mut counts = vec![0; matchers.len()];
 
         let tag_iterator = TagIterator::new(html);
         tag_iterator.for_each(|element| match element {
             Elements::Start(tag, _begin, _end) => {
-                self.path.push(Box::new(tag));
+                self.path.push(Box::new(TagPathItem {
+                    tag: Box::new(tag),
+                    nth_child: 0,
+                }));
 
                 self.update_counts_if_matching(&mut counts, &matchers);
             }
@@ -35,7 +40,7 @@ impl TagPathHtmlSelector {
     fn update_counts_if_matching(
         &self,
         counts: &mut Vec<usize>,
-        matchers: &Vec<&Vec<Box<dyn Fn(&Tag) -> bool>>>,
+        matchers: &Vec<&Vec<Box<dyn Fn(&TagPathItem) -> bool>>>,
     ) {
         self.check_any_matching(&matchers)
             .into_iter()
@@ -49,15 +54,15 @@ impl TagPathHtmlSelector {
             });
     }
 
-    fn check_any_matching(&self, matchers: &Vec<&Vec<Box<dyn Fn(&Tag) -> bool>>>) -> Vec<bool> {
+    fn check_any_matching(&self, matchers: &Vec<&Vec<Box<dyn Fn(&TagPathItem) -> bool>>>) -> Vec<bool> {
         matchers
             .into_iter()
             .map(|matcher| self.check_matching(&matcher))
             .collect()
     }
 
-    fn check_matching(&self, first_matcher: &Vec<Box<dyn Fn(&Tag) -> bool>>) -> bool {
-        let path: Vec<&Tag> = self
+    fn check_matching(&self, first_matcher: &Vec<Box<dyn Fn(&TagPathItem) -> bool>>) -> bool {
+        let path: Vec<&TagPathItem> = self
             .path
             .iter()
             .map(|boxed_tag| boxed_tag.as_ref())
@@ -112,7 +117,7 @@ mod test_tag_path_html_selector {
     }
     #[test]
     fn should_get_total() {
-            // #costBreakdown > tbody > tr:nth-child(9) > td:nth-child(2) > strong
+        // #costBreakdown > tbody > tr:nth-child(9) > td:nth-child(2) > strong
 
         let html = get_amazon_email_html();
 

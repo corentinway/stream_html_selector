@@ -5,9 +5,10 @@ pub struct TagPathItem {
     pub nth_child: usize,
 }
 
-pub fn match_tag_path<F>(tag_path: Vec<&Tag>, css_selector: &Vec<F>) -> bool
+
+pub fn match_tag_path<F>(tag_path: Vec<&TagPathItem>, css_selector: &Vec<F>) -> bool
 where
-    F: Fn(&Tag) -> bool,
+    F: Fn(&TagPathItem) -> bool,
 {
     if tag_path.is_empty() || tag_path.len() < css_selector.len() {
         return false;
@@ -20,13 +21,13 @@ where
 }
 
 fn match_tag_path_index<F>(
-    tag_path: Vec<&Tag>,
+    tag_path: Vec<&TagPathItem>,
     tag_index: usize,
     css_selector: &Vec<F>,
     selector_index: usize,
 ) -> bool
 where
-    F: Fn(&Tag) -> bool,
+    F: Fn(&TagPathItem) -> bool,
 {
     // FIXME unwrap
     let tag = tag_path.get(tag_index).unwrap();
@@ -52,23 +53,31 @@ mod test_tag_path {
     use crate::css_selector;
     use std::collections::HashMap;
 
-    fn build_tag_with_attribute(name: &str, attribute_key: &str, attribute_value: &str) -> Tag {
+    fn build_tag_with_attribute(name: &str, attribute_key: &str, attribute_value: &str) -> TagPathItem {
         let mut map = HashMap::new();
         map.insert(attribute_key.to_string(), attribute_value.to_string());
-        Tag {
+        let tag = Tag {
             name: name.to_string(),
             attributes: map,
             length: 0,
             is_autoclosing: false,
+        };
+        TagPathItem {
+            tag: Box::new(tag),
+            nth_child:0,
         }
     }
 
-    fn build_tag(name: &str) -> Tag {
-        Tag {
+    fn build_tag(name: &str) -> TagPathItem {
+        let tag = Tag {
             name: name.to_string(),
             attributes: HashMap::new(),
             length: 0,
             is_autoclosing: false,
+        };
+        TagPathItem {
+            tag: Box::new(tag),
+            nth_child:0,
         }
     }
 
