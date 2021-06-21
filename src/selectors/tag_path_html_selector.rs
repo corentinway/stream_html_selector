@@ -4,15 +4,16 @@ use crate::tag_iterator::TagIterator;
 
 use crate::tag_path::match_tag_path;
 use crate::tag_path::TagPathItem;
+use crate::tag_path::TagPath;
 
 
 pub struct TagPathHtmlSelector {
-    path: Vec<Box<TagPathItem>>,
+    path: TagPath,
 }
 
 impl TagPathHtmlSelector {
     fn new() -> Self {
-        TagPathHtmlSelector { path: Vec::new() }
+        TagPathHtmlSelector { path: TagPath::new() }
     }
 
     fn count(&mut self, html: &str, matchers: &Vec<&Vec<Box<dyn Fn(&TagPathItem) -> bool>>>) -> Vec<usize> {
@@ -21,15 +22,12 @@ impl TagPathHtmlSelector {
         let tag_iterator = TagIterator::new(html);
         tag_iterator.for_each(|element| match element {
             Elements::Start(tag, _begin, _end) => {
-                self.path.push(Box::new(TagPathItem {
-                    tag: Box::new(tag),
-                    nth_child: 0,
-                }));
+                self.path.add(tag);
 
                 self.update_counts_if_matching(&mut counts, &matchers);
             }
             Elements::End(_tag_name, _begin, _end) => {
-                self.path.pop();
+                self.path.reduce();
             }
             _ => {}
         });
@@ -62,13 +60,8 @@ impl TagPathHtmlSelector {
     }
 
     fn check_matching(&self, first_matcher: &Vec<Box<dyn Fn(&TagPathItem) -> bool>>) -> bool {
-        let path: Vec<&TagPathItem> = self
-            .path
-            .iter()
-            .map(|boxed_tag| boxed_tag.as_ref())
-            .collect();
 
-        match_tag_path(path, first_matcher)
+        match_tag_path(self.path.get_matching_path(), first_matcher)
     }
 }
 

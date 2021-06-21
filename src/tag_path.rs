@@ -5,6 +5,37 @@ pub struct TagPathItem {
     pub nth_child: usize,
 }
 
+pub struct TagPath {
+    path: Vec<Box<TagPathItem>>,
+}
+
+
+impl TagPath {
+    pub fn new() -> Self {
+        TagPath {
+            path: Vec::new()
+        }
+    }
+    pub fn add(&mut self, tag: Tag) {
+        self.path.push(Box::new(TagPathItem {
+            tag: Box::new(tag),
+            nth_child: 0,
+        }));
+    }
+    pub fn reduce(&mut self) {
+        self.path.pop();
+    }
+
+    pub fn get_matching_path(&self) -> Vec<&TagPathItem> {
+        self
+            .path
+            .iter()
+            .map(|boxed_tag| boxed_tag.as_ref())
+            .collect()
+    }
+}
+
+
 
 pub fn match_tag_path<F>(tag_path: Vec<&TagPathItem>, css_selector: &Vec<F>) -> bool
 where
