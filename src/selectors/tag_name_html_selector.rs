@@ -5,7 +5,6 @@ use crate::tag_iterator::{Elements, TagIterator};
 use crate::selectors::HtmlSelectorCounter;
 use crate::selectors::HtmlSelectorFindFirst;
 
-
 pub struct TagNameHtmlSelector {
     tag_name_path: Vec<String>,
     tag_name_path_string: String,

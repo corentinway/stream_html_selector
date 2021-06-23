@@ -11,6 +11,9 @@ impl MatcherHtmlSelector {
     }
 }
 
+/// HTML matcher that only use 1 predicate for the last tag path item.
+/// It returns the count of element that match
+/// **nth-child predicate is not supported**
 impl<F> HtmlSelectorCounter<F> for MatcherHtmlSelector
 where
     F: Fn(&TagPathItem) -> bool,
@@ -24,7 +27,7 @@ where
             Elements::Start(tag, _begin, _end) => {
                 let tag_path_item = TagPathItem {
                     tag: Box::new(tag),
-                    nth_child: 0,
+                    nth_child: 0, //FIXME
                 };
                 if matcher(&tag_path_item) {
                     count += 1;
@@ -37,6 +40,9 @@ where
     }
 }
 
+/// HTML matcher that only use 1 predicate for the last tag path item.
+/// It returns the 1st text of element that match
+/// **nth-child predicate is not supported**
 impl<F> HtmlSelectorFindFirst<F> for MatcherHtmlSelector
 where
     F: Fn(&TagPathItem) -> bool,
@@ -52,7 +58,7 @@ where
                 Elements::Start(tag, _begin, end) => {
                     let tag_path_item = TagPathItem {
                         tag: Box::new(tag),
-                        nth_child: 0,
+                        nth_child: 0, // FIXME
                     };
                     if matcher(&tag_path_item) {
                         reading_position = Some(end);

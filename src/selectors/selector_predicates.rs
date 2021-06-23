@@ -24,7 +24,9 @@ pub fn class_predicate(class: String) -> Box<dyn Fn(&TagPathItem) -> bool> {
 }
 
 pub fn has_attribute_predicate(attribute_name: String) -> Box<dyn Fn(&TagPathItem) -> bool> {
-    Box::new(move |tag_path_item: &TagPathItem| tag_path_item.tag.attributes.get(&attribute_name).is_some())
+    Box::new(move |tag_path_item: &TagPathItem| {
+        tag_path_item.tag.attributes.get(&attribute_name).is_some()
+    })
 }
 
 pub fn attribute_equals_predicate(
@@ -79,7 +81,7 @@ pub fn attribute_has_word_predicate(
     word: String,
 ) -> Box<dyn Fn(&TagPathItem) -> bool> {
     Box::new(move |tag_path_item: &TagPathItem| {
-        if let Some(actual_attribute_value) =tag_path_item.tag.attributes.get(&attribute_name) {
+        if let Some(actual_attribute_value) = tag_path_item.tag.attributes.get(&attribute_name) {
             return actual_attribute_value.starts_with(&format!("{} ", &word))
                 || actual_attribute_value.contains(&format!(" {} ", &word))
                 || actual_attribute_value.ends_with(&format!(" {}", &word));
@@ -88,7 +90,9 @@ pub fn attribute_has_word_predicate(
     })
 }
 
-pub fn and_predicate(predicates: Vec<Box<dyn Fn(&TagPathItem) -> bool>>) -> Box<dyn Fn(&TagPathItem) -> bool> {
+pub fn and_predicate(
+    predicates: Vec<Box<dyn Fn(&TagPathItem) -> bool>>,
+) -> Box<dyn Fn(&TagPathItem) -> bool> {
     Box::new(move |tag_path_item: &TagPathItem| {
         predicates
             .iter()
@@ -96,26 +100,28 @@ pub fn and_predicate(predicates: Vec<Box<dyn Fn(&TagPathItem) -> bool>>) -> Box<
     })
 }
 
+pub fn nth_child_predicate(expected_nth_child: usize) -> Box<dyn Fn(&TagPathItem) -> bool> {
+    Box::new(move |tag_path_item: &TagPathItem| tag_path_item.nth_child == expected_nth_child)
+}
+
 #[cfg(test)]
 mod test_selectors {
 
     use super::*;
+    use crate::elements::{start_element::Tag, Element};
     use std::collections::HashMap;
-    use crate::elements::{Element, start_element::Tag};
-
 
     fn create_tag(html: &str) -> TagPathItem {
         let tag = Tag::extract(html).expect("invalid code to create tag for test");
         TagPathItem {
             tag: Box::new(tag),
-            nth_child: 0,
+            nth_child: 1,
         }
     }
 
-
     #[test]
     fn should_match_with_tag_name() {
-        let tag_path_item =create_tag("<div>");
+        let tag_path_item = create_tag("<div>");
 
         let predicate = tag_name_predicate(String::from("div"));
 
@@ -125,7 +131,7 @@ mod test_selectors {
     }
     #[test]
     fn should_match_with_id() {
-        let tag_path_item =create_tag("<div id='foo'>");
+        let tag_path_item = create_tag("<div id='foo'>");
 
         let predicate = id_predicate(String::from("foo"));
 
@@ -135,7 +141,7 @@ mod test_selectors {
     }
     #[test]
     fn should_match_with_class() {
-        let tag_path_item =create_tag("<div class='foo bar baz'>");
+        let tag_path_item = create_tag("<div class='foo bar baz'>");
 
         let predicate = class_predicate(String::from("bar"));
 
@@ -145,7 +151,7 @@ mod test_selectors {
     }
     #[test]
     fn should_match_a_tag_with_2_predicates() {
-        let tag_path_item =create_tag("<div id='foo'>");
+        let tag_path_item = create_tag("<div id='foo'>");
 
         let tag_name_matcher = tag_name_predicate(String::from("div"));
         let id_matcher = id_predicate(String::from("foo"));
@@ -158,7 +164,7 @@ mod test_selectors {
     }
     #[test]
     fn should_match_a_tag_with_attribute() {
-        let tag_path_item =create_tag("<div hidden>");
+        let tag_path_item = create_tag("<div hidden>");
 
         let matcher = has_attribute_predicate(String::from("hidden"));
 
@@ -168,7 +174,7 @@ mod test_selectors {
     }
     #[test]
     fn should_match_a_tag_with_attribute_equals_its_value() {
-        let tag_path_item =create_tag("<div foo='bar'>");
+        let tag_path_item = create_tag("<div foo='bar'>");
 
         let matcher = attribute_equals_predicate(String::from("foo"), String::from("bar"));
 
@@ -178,7 +184,7 @@ mod test_selectors {
     }
     #[test]
     fn should_match_a_tag_with_attribute_starts_with_its_value() {
-        let tag_path_item =create_tag("<div foo='baaaaar'>");
+        let tag_path_item = create_tag("<div foo='baaaaar'>");
 
         let matcher = attribute_starts_with_predicate(String::from("foo"), String::from("baaa"));
 
@@ -188,7 +194,7 @@ mod test_selectors {
     }
     #[test]
     fn should_match_a_tag_with_attribute_ends_with_its_value() {
-        let tag_path_item =create_tag("<div foo='baaaaar'>");
+        let tag_path_item = create_tag("<div foo='baaaaar'>");
 
         let matcher = attribute_ends_with_predicate(String::from("foo"), String::from("aar"));
 
@@ -198,8 +204,7 @@ mod test_selectors {
     }
     #[test]
     fn should_match_a_tag_with_attribute_contains_with_its_value() {
-
-        let tag_path_item =create_tag("<div foo='baaaaar'>");
+        let tag_path_item = create_tag("<div foo='baaaaar'>");
 
         let matcher = attribute_contains_with_predicate(String::from("foo"), String::from("aaa"));
 
@@ -209,7 +214,7 @@ mod test_selectors {
     }
     #[test]
     fn should_match_a_tag_with_attribute_has_a_word_with_its_value() {
-        let tag_path_item =create_tag("<div data='foo bar baz'>");
+        let tag_path_item = create_tag("<div data='foo bar baz'>");
 
         let matcher = attribute_has_word_predicate(String::from("data"), String::from("foo"));
         let does_match = matcher(&tag_path_item);
@@ -222,9 +227,22 @@ mod test_selectors {
         assert!(does_match);
     }
 
+    // X:nth-child(n)
+    #[test]
+    fn should_match_the_second_nth_child() {
+        // GIVEN
+        let mut tag_path_item = create_tag("<div>");
+        tag_path_item.nth_child = 2;
+        // WHEN
+        let matcher = nth_child_predicate(2);
+        let does_match = matcher(&tag_path_item);
+        // THEN
+        assert!(does_match);
+    }
+
     // X:not(selector)
     // X::pseudoElement
-    // X:nth-child(n)
+
     // X:nth-last-child(n)
     // X:nth-of-type(n)
     // X:nth-last-of-type(n)

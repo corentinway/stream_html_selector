@@ -1,7 +1,5 @@
 //! We define a macro that return a predicate that match a CSS selector
 
-
-
 macro_rules! assert_is_dollar {
     ( $ ) => {};
 }
@@ -87,19 +85,34 @@ macro_rules! css_selector {
             ),
         ])
     };
+    (:nth-child ( $n:literal ) ) => {
+        crate::selectors::selector_predicates::nth_child_predicate($n)
+    };
+    ($tag_name:tt :nth-child ( $n:literal ) ) => {
+        crate::selectors::selector_predicates::and_predicate(vec![
+            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+                $tag_name
+            ))),
+            crate::selectors::selector_predicates::nth_child_predicate($n),
+        ])
+    };
+
+
+    
 }
 
 #[cfg(test)]
 mod test_css_selector_macro {
-    use crate::elements::{Element, start_element::Tag};
-    use std::collections::HashMap;
+    use crate::elements::{start_element::Tag, Element};
     use crate::tag_path::TagPathItem;
+    use std::collections::HashMap;
+    use std::fs::create_dir;
 
     fn create_tag(html: &str) -> TagPathItem {
         let tag = Tag::extract(html).expect("invalid HTML code to create tag in the tests");
         TagPathItem {
             tag: Box::new(tag),
-            nth_child: 0,
+            nth_child: 1,
         }
     }
 
@@ -192,5 +205,23 @@ mod test_css_selector_macro {
 
         assert!(matcher(&matched_tag_path_item));
         assert!(!matcher(&unmatched_tag_path_item));
+    }
+    #[test]
+    fn should_match_nth_child_only() {
+        let mut tag_path_item = create_tag("<div>");
+        tag_path_item.nth_child = 2;
+
+        let matcher = css_selector!(:nth-child(2));
+
+        assert!(matcher(&tag_path_item));
+    }
+    #[test]
+    fn should_match_nth_child_and_tag_name() {
+        let mut tag_path_item = create_tag("<div>");
+        tag_path_item.nth_child = 2;
+
+        let matcher = css_selector!(div: nth - child(2));
+
+        assert!(matcher(&tag_path_item));
     }
 }

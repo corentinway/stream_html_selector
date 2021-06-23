@@ -1,42 +1,61 @@
+use std::borrow::Borrow;
+
 use crate::elements::start_element::Tag;
 
+#[derive(Debug)]
 pub struct TagPathItem {
     pub tag: Box<Tag>,
     pub nth_child: usize,
 }
 
+#[derive(Debug)]
 pub struct TagPath {
     path: Vec<Box<TagPathItem>>,
+    last_popped_tag: Option<Box<TagPathItem>>,
 }
-
 
 impl TagPath {
     pub fn new() -> Self {
         TagPath {
-            path: Vec::new()
+            path: Vec::new(),
+            last_popped_tag: None,
         }
     }
     pub fn add(&mut self, tag: Tag) {
+        let next_nth_child = match self.last_popped_tag.borrow() {
+            Some(last_tag_path_item) => {
+                let last_tag_name = &last_tag_path_item.as_ref().tag.name;
+                if *last_tag_name == tag.name {
+                    // index +1
+                    last_tag_path_item.as_ref().nth_child + 1
+                } else {
+                    1
+                }
+            }
+            None => 1,
+        };
+
         self.path.push(Box::new(TagPathItem {
             tag: Box::new(tag),
-            nth_child: 0,
+            nth_child: next_nth_child,
         }));
     }
     pub fn reduce(&mut self) {
-        self.path.pop();
+        self.last_popped_tag = self.path.pop();
     }
 
     pub fn get_matching_path(&self) -> Vec<&TagPathItem> {
-        self
-            .path
+        self.path
             .iter()
             .map(|boxed_tag| boxed_tag.as_ref())
             .collect()
     }
 }
 
-
-
+/// match a `tag_path` as read by the HTML stream reader with a CSS selector `css_selector`.
+/// - tag_path is a vector where each element match an HTML tag. Each element indexed N has its parent at index N-1
+/// - css_selector is a vector of predicate. Each element of the vector will match one tag at a given index of the tag_path.
+/// This is a recursive algorithm where it tries to match the last element of the tag_path and go backwards to its parent.
 pub fn match_tag_path<F>(tag_path: Vec<&TagPathItem>, css_selector: &Vec<F>) -> bool
 where
     F: Fn(&TagPathItem) -> bool,
@@ -84,7 +103,11 @@ mod test_tag_path {
     use crate::css_selector;
     use std::collections::HashMap;
 
-    fn build_tag_with_attribute(name: &str, attribute_key: &str, attribute_value: &str) -> TagPathItem {
+    fn build_tag_with_attribute(
+        name: &str,
+        attribute_key: &str,
+        attribute_value: &str,
+    ) -> TagPathItem {
         let mut map = HashMap::new();
         map.insert(attribute_key.to_string(), attribute_value.to_string());
         let tag = Tag {
@@ -95,7 +118,7 @@ mod test_tag_path {
         };
         TagPathItem {
             tag: Box::new(tag),
-            nth_child:0,
+            nth_child: 1,
         }
     }
 
@@ -108,7 +131,7 @@ mod test_tag_path {
         };
         TagPathItem {
             tag: Box::new(tag),
-            nth_child:0,
+            nth_child: 1,
         }
     }
 
@@ -165,5 +188,69 @@ mod test_tag_path {
         let does_match = match_tag_path(tag_path, &css_selector);
 
         assert!(does_match)
+    }
+}
+
+#[cfg(test)]
+mod test_tag_path_nth {
+
+    use super::*;
+    use crate::elements::{start_element::Tag, Element};
+
+    fn create_tag(html: &str) -> Tag {
+        Tag::extract(html).expect("invalid HTML tag for testing")
+    }
+
+    #[test]
+    fn should_have_index_1_given_a_first_new_tag_is_added() {
+        // GIVEN
+        let body = create_tag("<body>");
+        // WHEN
+        let mut tag_path = TagPath::new();
+        tag_path.add(body);
+        // THEN
+        assert_nth_child_at(&tag_path, 0, 1);
+    }
+    #[test]
+    fn should_have_index_2_given_a_first_new_tag_is_added() {
+        // GIVEN
+        let body = create_tag("<body>");
+        let div1 = create_tag("<div>");
+        let div2 = create_tag("<div>");
+        // WHEN
+        let mut tag_path = TagPath::new();
+        tag_path.add(body);
+        // body:nth-child(1)
+        // THEN
+        assert_nth_child_at(&tag_path, 0, 1);
+        // WHEN
+        tag_path.add(div1);
+        // body:nth-child(1) > div:nth-child(1)
+        // THEN
+        assert_nth_child_at(&tag_path, 1, 1);
+
+        // WHEN
+        tag_path.reduce();
+        // THEN
+        assert_nth_child_at(&tag_path, 0, 1);
+
+        tag_path.add(div2);
+        // body:nth-child(1) > div:nth-child(2)
+        // THEN
+        assert_nth_child_at(&tag_path, 1, 2);
+
+        // WHEN
+        tag_path.reduce();
+        // THEN
+        assert_nth_child_at(&tag_path, 0, 1);
+    }
+
+    fn assert_nth_child_at(tag_path: &TagPath, index: usize, expected_nth_child: usize) {
+        let tag_path_item = tag_path
+            .path
+            .get(index)
+            .expect("invalid position of the tag for test")
+            .as_ref();
+        assert_eq!(expected_nth_child, tag_path_item.nth_child);
     }
 }
