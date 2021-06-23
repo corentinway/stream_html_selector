@@ -105,8 +105,7 @@ macro_rules! css_selector {
 mod test_css_selector_macro {
     use crate::elements::{start_element::Tag, Element};
     use crate::tag_path::TagPathItem;
-    use std::collections::HashMap;
-    use std::fs::create_dir;
+
 
     fn create_tag(html: &str) -> TagPathItem {
         let tag = Tag::extract(html).expect("invalid HTML code to create tag in the tests");

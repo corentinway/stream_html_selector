@@ -198,7 +198,7 @@ mod test_tag_path_html_selector {
             css_selector!(tbody),
             css_selector!(tr:nth-child(9)),
             css_selector!(td:nth-child(2)),
-            //css_selector!(strong),
+            css_selector!(strong),
         ];
         let paths_matcher = vec![&path_matcher1];
         // WHEN
@@ -206,5 +206,13 @@ mod test_tag_path_html_selector {
         let counts = html_selector.count(&html, &paths_matcher);
         // THEN
         assert_eq!(vec![1], counts);
+
+
+        // WHEN
+        let founds = html_selector.find_first(&html, &paths_matcher);
+        // THEN
+        assert_eq!(vec!["EUR 61,90".to_string()], founds);
+
+
     }
 }

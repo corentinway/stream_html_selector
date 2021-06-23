@@ -1,17 +1,34 @@
-use std::borrow::Borrow;
+use std::{borrow::Borrow, fmt::Write};
 
 use crate::elements::start_element::Tag;
 
-#[derive(Debug)]
 pub struct TagPathItem {
     pub tag: Box<Tag>,
     pub nth_child: usize,
 }
 
+impl std::fmt::Debug for TagPathItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+
+        let nth_child = /*if self.nth_child > 1 {*/
+            format!(":nth-child({})", self.nth_child);
+        /*} else {
+            format!("")
+        };*/
+        let id = if self.tag.id().is_none() {
+            format!("")
+        } else {
+            format!("#{}", self.tag.id().unwrap())
+        };
+
+        f.write_fmt(format_args!("{}{}{}", self.tag.name, id, nth_child))
+    }
+}
+
 #[derive(Debug)]
 pub struct TagPath {
     path: Vec<Box<TagPathItem>>,
-    last_popped_tag: Option<Box<TagPathItem>>,
+    last_popped_tag: Option<(Box<TagPathItem>, usize)>,  // FIXME : should we have a vector of last popped tag ?
 }
 
 impl TagPath {
@@ -22,15 +39,28 @@ impl TagPath {
         }
     }
     pub fn add(&mut self, tag: Tag) {
+
+        //println!("ADD - {:?} - new tag {:?} - last popped {:?}", self.path, tag, self.last_popped_tag);
+
+
         let next_nth_child = match self.last_popped_tag.borrow() {
-            Some(last_tag_path_item) => {
-                let last_tag_name = &last_tag_path_item.as_ref().tag.name;
-                if *last_tag_name == tag.name {
-                    // index +1
-                    last_tag_path_item.as_ref().nth_child + 1
-                } else {
+            Some((last_tag_path_item, depth)) => {
+
+                // if the depth of the last popped tag is lower than the actual path length, 
+                // then the last popped tag was not meaningfull
+                if *depth < self.path.len() {
                     1
+                } else {
+                    let last_tag_name = &last_tag_path_item.as_ref().tag.name;
+                    if *last_tag_name == tag.name {
+                        // index +1
+                        last_tag_path_item.as_ref().nth_child + 1
+                    } else {
+                        1
+                    }
                 }
+
+                
             }
             None => 1,
         };
@@ -41,7 +71,9 @@ impl TagPath {
         }));
     }
     pub fn reduce(&mut self) {
-        self.last_popped_tag = self.path.pop();
+        let len = self.path.len();
+        self.last_popped_tag = self.path.pop().map(|t| (t, len));
+        //println!("REDUCE - {:?} - new tag {:?}", self.path, self.last_popped_tag);
     }
 
     pub fn get_matching_path(&self) -> Vec<&TagPathItem> {
