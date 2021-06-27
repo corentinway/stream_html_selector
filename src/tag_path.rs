@@ -9,7 +9,6 @@ pub struct TagPathItem {
 
 impl std::fmt::Debug for TagPathItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-
         let nth_child = /*if self.nth_child > 1 {*/
             format!(":nth-child({})", self.nth_child);
         /*} else {
@@ -28,7 +27,7 @@ impl std::fmt::Debug for TagPathItem {
 #[derive(Debug)]
 pub struct TagPath {
     path: Vec<Box<TagPathItem>>,
-    last_popped_tag: Option<(Box<TagPathItem>, usize)>,  // FIXME : should we have a vector of last popped tag ?
+    last_popped_tag: Option<(Box<TagPathItem>, usize)>, // FIXME : should we have a vector of last popped tag ?
 }
 
 impl TagPath {
@@ -39,14 +38,11 @@ impl TagPath {
         }
     }
     pub fn add(&mut self, tag: Tag) {
-
         //println!("ADD - {:?} - new tag {:?} - last popped {:?}", self.path, tag, self.last_popped_tag);
-
 
         let next_nth_child = match self.last_popped_tag.borrow() {
             Some((last_tag_path_item, depth)) => {
-
-                // if the depth of the last popped tag is lower than the actual path length, 
+                // if the depth of the last popped tag is lower than the actual path length,
                 // then the last popped tag was not meaningfull
                 if *depth < self.path.len() {
                     1
@@ -59,8 +55,6 @@ impl TagPath {
                         1
                     }
                 }
-
-                
             }
             None => 1,
         };
@@ -210,7 +204,7 @@ mod test_tag_path {
     #[test]
     fn should_match_given_a_css_selector_sorter_than_the_tag_path() {
         let html_tag = &build_tag("html");
-        let body_tag = &build_tag("body");
+        let body_tag = &build_tag("body:nth-child(1)");
         let table_tag = &build_tag("table");
         let tbody_tag = &build_tag("tbody");
         let tag_path = vec![html_tag, body_tag, table_tag, tbody_tag];
@@ -284,5 +278,85 @@ mod test_tag_path_nth {
             .expect("invalid position of the tag for test")
             .as_ref();
         assert_eq!(expected_nth_child, tag_path_item.nth_child);
+    }
+}
+
+#[cfg(test)]
+mod test_tag_path_nth_child {
+    use super::*;
+    use crate::tag_iterator::{Elements, TagIterator};
+
+    #[test]
+    fn should_match_all_tag_nth_child() {
+        let html = std::fs::read_to_string("tables.html").unwrap();
+
+        let mut tag_path = TagPath::new();
+
+        let expected_paths = vec![
+            "body:nth-child(1)".to_string(),
+            "body:nth-child(1) table:nth-child(1)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(1)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(1) td:nth-child(1)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(1) td:nth-child(2)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(2)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(2) td:nth-child(1)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(2) td:nth-child(2)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(3)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(3) td:nth-child(1)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(3) td:nth-child(2)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(4)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(4) td:nth-child(1)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(4) td:nth-child(1) table:nth-child(1)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(4) td:nth-child(1) table:nth-child(1) tr:nth-child(1)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(4) td:nth-child(1) table:nth-child(1) tr:nth-child(1) td:nth-child(1)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(4) td:nth-child(1) table:nth-child(1) tr:nth-child(1) td:nth-child(2)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(4) td:nth-child(1) table:nth-child(1) tr:nth-child(2)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(4) td:nth-child(1) table:nth-child(1) tr:nth-child(2) td:nth-child(1)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(4) td:nth-child(1) table:nth-child(1) tr:nth-child(2) td:nth-child(2)".to_string(),
+            "body:nth-child(1) table:nth-child(1) tr:nth-child(4) td:nth-child(2)".to_string(),
+        ];
+
+        let mut start_element_index = 0;
+
+        let tag_iterator = TagIterator::new(&html);
+        tag_iterator.enumerate().for_each(|(_index, element)| {
+            match element {
+                Elements::Start(tag, _begin, _end) => {
+                    tag_path.add(tag);
+                    assert_tag_path(
+                        &tag_path,
+                        expected_paths
+                            .get(start_element_index)
+                            .expect("expected value required for test"),
+                    );
+                    start_element_index = start_element_index + 1;
+                }
+                Elements::End(_, _, _) => {
+                    tag_path.reduce();
+                }
+                //Elements::Comment(tag) => {},
+                //Elements::Text(tag) => {},
+                _ => {}
+            }
+        });
+    }
+
+    fn assert_tag_path(tag_path: &TagPath, expected_path: &String) {
+        let names: Vec<String> = tag_path
+            .path
+            .iter()
+            .map(|boxed_tag_path_item| boxed_tag_path_item.as_ref())
+            .map(|tpi| {
+                let name = tpi.tag.as_ref().name.as_str();
+                let nth_child = tpi.nth_child;
+                format!("{}:nth-child({})", name, nth_child)
+            })
+            .collect();
+
+        let actual_path = names.join(" ");
+        println!("Actual Path:   {:?}", actual_path);
+        println!("Expected Path: {:?}", expected_path);
+
+        assert_eq!(*expected_path, actual_path);
     }
 }

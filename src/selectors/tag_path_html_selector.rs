@@ -25,18 +25,16 @@ impl TagPathHtmlSelector {
         let mut counts = vec![0; matchers.len()];
 
         let tag_iterator = TagIterator::new(html);
-        tag_iterator.for_each(|element| {
-            match element {
-                Elements::Start(tag, _begin, _end) => {
-                    self.path.add(tag);
+        tag_iterator.for_each(|element| match element {
+            Elements::Start(tag, _begin, _end) => {
+                self.path.add(tag);
 
-                    self.update_counts_if_matching(&mut counts, &matchers);
-                }
-                Elements::End(_tag_name, _begin, _end) => {
-                    self.path.reduce();
-                }
-                _ => {}
+                self.update_counts_if_matching(&mut counts, &matchers);
             }
+            Elements::End(_tag_name, _begin, _end) => {
+                self.path.reduce();
+            }
+            _ => {}
         });
 
         counts
@@ -196,8 +194,8 @@ mod test_tag_path_html_selector {
         let path_matcher1 = vec![
             css_selector!(#costBreakdown),
             css_selector!(tbody),
-            css_selector!(tr:nth-child(9)),
-            css_selector!(td:nth-child(2)),
+            css_selector!(tr: nth - child(9)),
+            css_selector!(td: nth - child(2)),
             css_selector!(strong),
         ];
         let paths_matcher = vec![&path_matcher1];
@@ -207,12 +205,9 @@ mod test_tag_path_html_selector {
         // THEN
         assert_eq!(vec![1], counts);
 
-
         // WHEN
         let founds = html_selector.find_first(&html, &paths_matcher);
         // THEN
         assert_eq!(vec!["EUR 61,90".to_string()], founds);
-
-
     }
 }

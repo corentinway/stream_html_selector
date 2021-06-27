@@ -1,5 +1,6 @@
 //! We define a macro that return a predicate that match a CSS selector
 
+#[macro_export]
 macro_rules! assert_is_dollar {
     ( $ ) => {};
 }
@@ -96,16 +97,12 @@ macro_rules! css_selector {
             crate::selectors::selector_predicates::nth_child_predicate($n),
         ])
     };
-
-
-    
 }
 
 #[cfg(test)]
 mod test_css_selector_macro {
     use crate::elements::{start_element::Tag, Element};
     use crate::tag_path::TagPathItem;
-
 
     fn create_tag(html: &str) -> TagPathItem {
         let tag = Tag::extract(html).expect("invalid HTML code to create tag in the tests");
