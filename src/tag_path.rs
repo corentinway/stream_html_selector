@@ -109,9 +109,7 @@ where
     let tag = tag_path.get(tag_index).unwrap();
     let selector = css_selector.get(selector_index).unwrap();
     if selector(tag) {
-        if tag_index == 0 && selector_index == 0 {
-            true
-        } else if selector_index == 0 {
+        if selector_index == 0 {
             true
         } else {
             match_tag_path_index(tag_path, tag_index - 1, css_selector, selector_index - 1)
