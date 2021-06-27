@@ -93,9 +93,9 @@ impl HtmlSelectorFindFirst<&str> for TagNameHtmlSelector {
 
         for element in tag_iterator {
             match element {
-                Elements::Start(tag, begin, end) => {
+                Elements::Start(tag, _begin, end) => {
                     self.increase_path(Box::new(tag));
-                    if let Some(index) = self.does_match_css_request(&css_requests) {
+                    if let Some(_index) = self.does_match_css_request(&css_requests) {
                         // get begin and end position of the tag in the
                         // then, if the next decrease the path with the ending tag,
                         // so we have all tag position
@@ -112,8 +112,6 @@ impl HtmlSelectorFindFirst<&str> for TagNameHtmlSelector {
                     }
                     self.reduce_path();
                 }
-                //Elements::Comment(tag) => {},
-                Elements::Text(tag) => {}
                 _ => {}
             }
         }

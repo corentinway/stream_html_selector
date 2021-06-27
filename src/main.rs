@@ -1,4 +1,4 @@
-use stream_html_selector::count;
+use stream_html_selector::by_name::count;
 
 use std::fs;
 use std::time::Instant;

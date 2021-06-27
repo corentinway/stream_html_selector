@@ -4,9 +4,9 @@ use crate::tag_iterator::Elements;
 use crate::tag_iterator::TagIterator;
 use crate::tag_path::TagPathItem;
 
-struct MatcherHtmlSelector {}
+pub struct MatcherHtmlSelector {}
 impl MatcherHtmlSelector {
-    fn new() -> Self {
+    pub fn new() -> Self {
         MatcherHtmlSelector {}
     }
 }

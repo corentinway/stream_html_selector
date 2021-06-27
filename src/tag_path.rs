@@ -1,4 +1,4 @@
-use std::{borrow::Borrow, fmt::Write};
+use std::borrow::Borrow;
 
 use crate::elements::start_element::Tag;
 
@@ -7,13 +7,10 @@ pub struct TagPathItem {
     pub nth_child: usize,
 }
 
+/// Format a tag path item with 2 informations : tag's id or '' and nth-child index (always)
 impl std::fmt::Debug for TagPathItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let nth_child = /*if self.nth_child > 1 {*/
-            format!(":nth-child({})", self.nth_child);
-        /*} else {
-            format!("")
-        };*/
+        let nth_child = format!(":nth-child({})", self.nth_child);
         let id = if self.tag.id().is_none() {
             format!("")
         } else {

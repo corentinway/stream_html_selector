@@ -1,4 +1,3 @@
-use crate::elements::start_element::Tag;
 use crate::tag_iterator::Elements;
 use crate::tag_iterator::TagIterator;
 
@@ -11,13 +10,13 @@ pub struct TagPathHtmlSelector {
 }
 
 impl TagPathHtmlSelector {
-    fn new() -> Self {
+    pub fn new() -> Self {
         TagPathHtmlSelector {
             path: TagPath::new(),
         }
     }
 
-    fn count(
+    pub fn count(
         &mut self,
         html: &str,
         matchers: &Vec<&Vec<Box<dyn Fn(&TagPathItem) -> bool>>>,
@@ -40,7 +39,7 @@ impl TagPathHtmlSelector {
         counts
     }
 
-    fn find_first(
+    pub fn find_first(
         &mut self,
         html: &str,
         matchers: &Vec<&Vec<Box<dyn Fn(&TagPathItem) -> bool>>>,
@@ -124,7 +123,7 @@ mod test_tag_path_html_selector {
 
     use super::*;
 
-    use std::{fs, path::is_separator};
+    use std::fs;
 
     fn get_amazon_email_html() -> String {
         let filename = "./amazon_command.html";

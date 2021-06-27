@@ -1,4 +1,3 @@
-use crate::elements::start_element::Tag;
 use crate::tag_path::TagPathItem;
 
 pub fn tag_name_predicate(name: String) -> Box<dyn Fn(&TagPathItem) -> bool> {
@@ -109,7 +108,6 @@ mod test_selectors {
 
     use super::*;
     use crate::elements::{start_element::Tag, Element};
-    use std::collections::HashMap;
 
     fn create_tag(html: &str) -> TagPathItem {
         let tag = Tag::extract(html).expect("invalid code to create tag for test");

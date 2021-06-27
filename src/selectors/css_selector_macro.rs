@@ -15,7 +15,7 @@ macro_rules! css_selector {
     };
     // ID Selectors
     (# $id:tt) => {
-        crate::selectors::selector_predicates::id_predicate(String::from(stringify!($id)))
+        $crate::selectors::selector_predicates::id_predicate(String::from(stringify!($id)))
     };
     ($tag_name:tt # $id:tt) => {
         crate::selectors::selector_predicates::and_predicate(vec![
