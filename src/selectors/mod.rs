@@ -1,5 +1,8 @@
+pub mod css_selector_macro;
 pub mod matcher_html_selector;
+pub mod selector_predicates;
 pub mod tag_name_html_selector;
+pub mod tag_path_html_selector;
 
 pub trait HtmlSelectorCounter<T> {
     fn count(&mut self, html: &str, css_requests: &[T]) -> Vec<usize>;
