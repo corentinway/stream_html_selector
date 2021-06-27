@@ -9,7 +9,7 @@ macro_rules! assert_is_dollar {
 #[macro_export]
 macro_rules! css_selector {
     ($tag_name: tt) => {
-        crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+        $crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
             $tag_name
         )))
     };
@@ -18,24 +18,24 @@ macro_rules! css_selector {
         $crate::selectors::selector_predicates::id_predicate(String::from(stringify!($id)))
     };
     ($tag_name:tt # $id:tt) => {
-        crate::selectors::selector_predicates::and_predicate(vec![
-            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+        $crate::selectors::selector_predicates::and_predicate(vec![
+            $crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
                 $tag_name
             ))),
-            crate::selectors::selector_predicates::id_predicate(String::from(stringify!($id))),
+            $crate::selectors::selector_predicates::id_predicate(String::from(stringify!($id))),
         ])
     };
 
     // CLASS Selectors
     (. $class:tt) => {
-        crate::selectors::selector_predicates::class_predicate(String::from(stringify!($class)))
+        $crate::selectors::selector_predicates::class_predicate(String::from(stringify!($class)))
     };
     ($tag_name:tt . $class:tt) => {
-        crate::selectors::selector_predicates::and_predicate(vec![
-            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+        $crate::selectors::selector_predicates::and_predicate(vec![
+            $crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
                 $tag_name
             ))),
-            crate::selectors::selector_predicates::class_predicate(String::from(stringify!(
+            $crate::selectors::selector_predicates::class_predicate(String::from(stringify!(
                 $class
             ))),
         ])
@@ -43,32 +43,32 @@ macro_rules! css_selector {
 
     // ATTRIBUTE Selectors
     ($tag_name:tt [$attribute_name:tt]) => {
-        crate::selectors::selector_predicates::and_predicate(vec![
-            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+        $crate::selectors::selector_predicates::and_predicate(vec![
+            $crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
                 $tag_name
             ))),
-            crate::selectors::selector_predicates::has_attribute_predicate(String::from(
+            $crate::selectors::selector_predicates::has_attribute_predicate(String::from(
                 stringify!($attribute_name),
             )),
         ])
     };
     ($tag_name:tt [$attribute_name:tt = $attribute_value:literal ]) => {
-        crate::selectors::selector_predicates::and_predicate(vec![
-            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+        $crate::selectors::selector_predicates::and_predicate(vec![
+            $crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
                 $tag_name
             ))),
-            crate::selectors::selector_predicates::attribute_equals_predicate(
+            $crate::selectors::selector_predicates::attribute_equals_predicate(
                 String::from(stringify!($attribute_name)),
                 String::from($attribute_value),
             ),
         ])
     };
     ($tag_name:tt [$attribute_name:tt ^= $attribute_value:literal ]) => {
-        crate::selectors::selector_predicates::and_predicate(vec![
-            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+        $crate::selectors::selector_predicates::and_predicate(vec![
+            $crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
                 $tag_name
             ))),
-            crate::selectors::selector_predicates::attribute_starts_with_predicate(
+            $crate::selectors::selector_predicates::attribute_starts_with_predicate(
                 String::from(stringify!($attribute_name)),
                 String::from($attribute_value),
             ),
@@ -76,25 +76,25 @@ macro_rules! css_selector {
     };
     ($tag_name:tt [$attribute_name:tt $dollar:tt = $attribute_value:literal ]) => {
         //assert_is_dollar!( $dollar );
-        crate::selectors::selector_predicates::and_predicate(vec![
-            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+        $crate::selectors::selector_predicates::and_predicate(vec![
+            $crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
                 $tag_name
             ))),
-            crate::selectors::selector_predicates::attribute_ends_with_predicate(
+            $crate::selectors::selector_predicates::attribute_ends_with_predicate(
                 String::from(stringify!($attribute_name)),
                 String::from($attribute_value),
             ),
         ])
     };
     (:nth-child ( $n:literal ) ) => {
-        crate::selectors::selector_predicates::nth_child_predicate($n)
+        $crate::selectors::selector_predicates::nth_child_predicate($n)
     };
     ($tag_name:tt :nth-child ( $n:literal ) ) => {
-        crate::selectors::selector_predicates::and_predicate(vec![
-            crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
+        $crate::selectors::selector_predicates::and_predicate(vec![
+            $crate::selectors::selector_predicates::tag_name_predicate(String::from(stringify!(
                 $tag_name
             ))),
-            crate::selectors::selector_predicates::nth_child_predicate($n),
+            $crate::selectors::selector_predicates::nth_child_predicate($n),
         ])
     };
 }
