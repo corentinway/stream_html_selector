@@ -14,7 +14,7 @@ fn main() {
     let command_number_matcher = vec![
         css_selector!(#header),
         css_selector!(tbody),
-        css_selector!(tr: nth - child(2)),
+        css_selector!(tr:nth-child(2)),
         css_selector!(td),
         css_selector!(a),
     ];
@@ -22,19 +22,45 @@ fn main() {
     let total_matcher = vec![
         css_selector!(#costBreakdown),
         css_selector!(tbody),
-        css_selector!(tr: nth - child(9)),
-        css_selector!(td: nth - child(2)),
+        css_selector!(tr:nth-child(9)),
+        css_selector!(td:nth-child(2)),
         css_selector!(strong),
     ];
 
-    let matchers = vec![&command_number_matcher, &total_matcher];
+    // #itemDetails > tbody > tr > td.name > a:nth-child(1)
+    let label_item_1 = vec![
+        css_selector!(#itemDetails),
+        css_selector!(tbody),
+        css_selector!(tr),
+        css_selector!(td.name),
+        css_selector!(a:nth-child(1)),
+    ];
+    
+    // #itemDetails > tbody > tr > td.price > strong
+    let amount_item_1 = vec![
+        css_selector!(#itemDetails),
+        css_selector!(tbody),
+        css_selector!(tr),
+        css_selector!(td.price),
+        css_selector!(strong),
+    ];
+    
+
+    let matchers = vec![
+        &command_number_matcher, 
+        &total_matcher,
+        &label_item_1  ,  
+        &amount_item_1  ,  
+    ];
 
     let founds = find_first(html.as_str(), &matchers);
 
     println!("Parsing execution time: {} ms", now.elapsed().as_millis());
     println!(
-        "Command number {:?} for a total of {:?}",
+        "Command number {:?} for a total of {:?}\n- item {:?} price {:?}",
         founds.get(0),
-        founds.get(1)
+        founds.get(1),
+        founds.get(2),
+        founds.get(3)
     );
 }
