@@ -118,7 +118,7 @@ impl TagPathHtmlSelector {
 
     fn check_any_matching(
         &self,
-        matchers: &Vec<&Vec<Box<Predicate>>>,
+        matchers: &Vec<   &Vec<Box<Predicate>>>,
     ) -> Vec<bool> {
         matchers
             .iter()
@@ -126,7 +126,7 @@ impl TagPathHtmlSelector {
             .collect()
     }
 
-    fn check_matching(&self, first_matcher: &Vec<Box<Predicate>>) -> bool {
+    fn check_matching(&self, first_matcher: &[Box<Predicate>]) -> bool {
         match_tag_path(self.path.get_matching_path(), first_matcher)
     }
 }

@@ -6,8 +6,13 @@ use crate::tag_path::TagPathItem;
 
 pub struct MatcherHtmlSelector {}
 impl MatcherHtmlSelector {
-    pub fn new() -> Self {
+    fn new() -> Self {
         MatcherHtmlSelector {}
+    }
+}
+impl Default for MatcherHtmlSelector {
+    fn default() -> Self {
+        MatcherHtmlSelector::new()
     }
 }
 

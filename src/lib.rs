@@ -37,7 +37,7 @@ pub mod by_name {
     /// - `html` is an HTML code
     /// - `css_requests` contains a list of CSS selectors. **One CSS Selector** is a list of tag name within a `Vec<&str>` struct.
     pub fn count(html: &str, css_requests: &[&str]) -> Vec<usize> {
-        let mut html_selector = TagNameHtmlSelector::new();
+        let mut html_selector = TagNameHtmlSelector::default();
         html_selector.count(html, css_requests)
     }
 
@@ -46,7 +46,7 @@ pub mod by_name {
     /// - `html` is an HTML code
     /// - `css_requests` contains a list of CSS selectors. **One CSS Selector** is a list of tag name within a `Vec<&str>` struct.
     pub fn find_first(html: &str, css_requests: &[&str]) -> String {
-        let mut html_selector = TagNameHtmlSelector::new();
+        let mut html_selector = TagNameHtmlSelector::default();
         html_selector.find_first(html, css_requests)
     }
 }
@@ -64,7 +64,7 @@ pub mod with_matcher {
     where
         F: Fn(&TagPathItem) -> bool,
     {
-        let mut html_selector = MatcherHtmlSelector::new();
+        let mut html_selector = MatcherHtmlSelector::default();
         html_selector.count(html, css_requests)
     }
 
@@ -76,7 +76,7 @@ pub mod with_matcher {
     where
         F: Fn(&TagPathItem) -> bool,
     {
-        let mut html_selector = MatcherHtmlSelector::new();
+        let mut html_selector = MatcherHtmlSelector::default();
         html_selector.find_first(html, css_requests)
     }
 }

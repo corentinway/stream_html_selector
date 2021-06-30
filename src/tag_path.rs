@@ -86,7 +86,6 @@ impl TagPath {
     pub fn get_matching_path(&self) -> Vec<&TagPathItem> {
         self.path
             .iter()
-            .map(|boxed_tag| boxed_tag)
             .collect()
     }
 }
@@ -95,7 +94,7 @@ impl TagPath {
 /// - tag_path is a vector where each element match an HTML tag. Each element indexed N has its parent at index N-1
 /// - css_selector is a vector of predicate. Each element of the vector will match one tag at a given index of the tag_path.
 /// This is a recursive algorithm where it tries to match the last element of the tag_path and go backwards to its parent.
-pub fn match_tag_path<F>(tag_path: Vec<&TagPathItem>, css_selector: &Vec<F>) -> bool
+pub fn match_tag_path<F>(tag_path: Vec<&TagPathItem>, css_selector: &[F]) -> bool
 where
     F: Fn(&TagPathItem) -> bool,
 {
@@ -112,7 +111,7 @@ where
 fn match_tag_path_index<F>(
     tag_path: Vec<&TagPathItem>,
     tag_index: usize,
-    css_selector: &Vec<F>,
+    css_selector: &[F],
     selector_index: usize,
 ) -> bool
 where
