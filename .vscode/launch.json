@@ -1,0 +1,77 @@
+{
+    // Utilisez IntelliSense pour en savoir plus sur les attributs possibles.
+    // Pointez pour afficher la description des attributs existants.
+    // Pour plus d'informations, visitez : https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'stream_html_selector'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=stream_html_selector"
+                ],
+                "filter": {
+                    "name": "stream_html_selector",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+//  cargo test --package stream_html_selector --lib --all-features -- selectors::tag_path_html_selector::test_tag_path_html_selector::should_get_command_number --exact --nocapture
+
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "should get command number",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--package",
+                    "stream_html_selector", 
+                    "--lib",
+                    "--all-features",
+                    "--",  
+                    "selectors::tag_path_html_selector::test_tag_path_html_selector::should_get_command_number",
+                    "--exact",
+                    "--nocapture"
+                ]
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'stream_html_selector'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=stream_html_selector",
+                    "--package=stream_html_selector"
+                ],
+                "filter": {
+                    "name": "stream_html_selector",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Main",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/debug/stream_html_selector.exe",
+            "args": [],
+           // "sourceLanguages": ["rust"]
+        }
+       
+       
+    ]
+}

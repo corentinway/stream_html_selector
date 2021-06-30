@@ -35,7 +35,11 @@ impl TagPath {
         }
     }
     pub fn add(&mut self, tag: Tag) {
-        //println!("ADD - {:?} - new tag {:?} - last popped {:?}", self.path, tag, self.last_popped_tag);
+        #[cfg(test)]
+        println!(
+            "\nADD - {:?}\n\t- new tag {:?}\n\t- last popped {:?}",
+            self.path, tag, self.last_popped_tag
+        );
 
         let next_nth_child = match self.last_popped_tag.borrow() {
             Some((last_tag_path_item, depth)) => {
@@ -60,11 +64,23 @@ impl TagPath {
             tag: Box::new(tag),
             nth_child: next_nth_child,
         }));
+
+        #[cfg(test)]
+        println!("\t==> path {:?}", self.path);
     }
     pub fn reduce(&mut self) {
+        #[cfg(test)]
+        println!(
+            "\nREDUCEing - {:?}\n\t- popped tag {:?}",
+            self.path, self.last_popped_tag
+        );
         let len = self.path.len();
         self.last_popped_tag = self.path.pop().map(|t| (t, len));
-        //println!("REDUCE - {:?} - new tag {:?}", self.path, self.last_popped_tag);
+        #[cfg(test)]
+        println!(
+            "\t==>- {:?}\n\t- popped tag {:?}",
+            self.path, self.last_popped_tag
+        );
     }
 
     pub fn get_matching_path(&self) -> Vec<&TagPathItem> {

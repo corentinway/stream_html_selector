@@ -26,9 +26,14 @@ impl TagPathHtmlSelector {
         let tag_iterator = TagIterator::new(html);
         tag_iterator.for_each(|element| match element {
             Elements::Start(tag, _begin, _end) => {
+                let is_autoclosing_tag = tag.is_autoclosing;
                 self.path.add(tag);
 
                 self.update_counts_if_matching(&mut counts, &matchers);
+
+                if is_autoclosing_tag {
+                    self.path.reduce()
+                }
             }
             Elements::End(_tag_name, _begin, _end) => {
                 self.path.reduce();
@@ -49,6 +54,7 @@ impl TagPathHtmlSelector {
         let tag_iterator = TagIterator::new(html);
         tag_iterator.for_each(|element| match element {
             Elements::Start(tag, _begin, end) => {
+                let is_autoclosing_tag = tag.is_autoclosing;
                 self.path.add(tag);
                 self.check_any_matching(&matchers)
                     .into_iter()
@@ -60,6 +66,13 @@ impl TagPathHtmlSelector {
                             }
                         }
                     });
+                if is_autoclosing_tag {
+                    self.path.reduce();
+                }
+            }
+            Elements::Text(content) => {
+                #[cfg(test)]
+                println!("\t\t CONTENT : {:?}", content);
             }
             Elements::End(_tag_name, begin, _end) => {
                 self.path.reduce();
@@ -127,6 +140,10 @@ mod test_tag_path_html_selector {
 
     fn get_amazon_email_html() -> String {
         let filename = "./amazon_command.html";
+        fs::read_to_string(filename).unwrap()
+    }
+    fn get_amazon_header_email_html() -> String {
+        let filename = "./amazon_command_header.html";
         fs::read_to_string(filename).unwrap()
     }
     fn get_simple_email_html() -> String {
@@ -208,5 +225,33 @@ mod test_tag_path_html_selector {
         let founds = html_selector.find_first(&html, &paths_matcher);
         // THEN
         assert_eq!(vec!["EUR 61,90".to_string()], founds);
+    }
+
+    #[test]
+    fn should_get_command_number() {
+        // GIVEN
+        let html = get_amazon_header_email_html();
+
+        // #header > tbody > tr:nth-child(2) > td > a
+        let command_number_matcher = vec![
+            css_selector!(#header),
+            css_selector!(tbody),
+            css_selector!(tr: nth - child(2)),
+            css_selector!(td),
+            css_selector!(a),
+        ];
+        let paths_matcher = vec![&command_number_matcher];
+        // WHEN
+        let mut html_selector = TagPathHtmlSelector::new();
+        let counts = html_selector.count(&html, &paths_matcher);
+        // THEN
+        assert_eq!(vec![1], counts);
+
+        // WHEN
+        let founds = html_selector.find_first(&html, &paths_matcher);
+        // THEN
+        println!("Founds {:?}", founds);
+        assert!(founds.len() == 1);
+        assert_eq!(vec!["405-5855855-9921124".to_string()], founds);
     }
 }

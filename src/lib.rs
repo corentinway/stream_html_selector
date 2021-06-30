@@ -4,7 +4,6 @@ mod tag_path;
 
 mod elements;
 
-
 /// this will search into html based on tag name only.
 // a query is a Vec<&str> where each element is a tag name to match.
 // the query does not have its length equals to the actual depth of the element.
@@ -64,8 +63,8 @@ pub mod with_matcher {
 }
 
 pub mod by_tag_path {
-    pub use crate::tag_path::TagPathItem;
     use super::selectors::tag_path_html_selector::TagPathHtmlSelector;
+    pub use crate::tag_path::TagPathItem;
 
     pub fn count(
         html: &str,
