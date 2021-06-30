@@ -216,7 +216,7 @@ mod test_css_selector_macro {
         let mut tag_path_item = create_tag("<div>");
         tag_path_item.nth_child = 2;
 
-        let matcher = css_selector!(div: nth - child(2));
+        let matcher = css_selector!(div:nth-child(2));
 
         assert!(matcher(&tag_path_item));
     }

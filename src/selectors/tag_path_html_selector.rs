@@ -181,14 +181,14 @@ mod test_tag_path_html_selector {
         let total_label_matcher = vec![
             css_selector!(table),
             css_selector!(tbody),
-            css_selector!(tr: nth - child(4)),
-            css_selector!(td: nth - child(1)),
+            css_selector!(tr:nth-child(4)),
+            css_selector!(td:nth-child(1)),
         ];
         let total_amount_matcher = vec![
             css_selector!(table),
             css_selector!(tbody),
-            css_selector!(tr: nth - child(4)),
-            css_selector!(td: nth - child(3)),
+            css_selector!(tr:nth-child(4)),
+            css_selector!(td:nth-child(3)),
         ];
         let paths_matcher = vec![&total_label_matcher, &total_amount_matcher];
         // WHEN
@@ -210,8 +210,8 @@ mod test_tag_path_html_selector {
         let path_matcher1 = vec![
             css_selector!(#costBreakdown),
             css_selector!(tbody),
-            css_selector!(tr: nth - child(9)),
-            css_selector!(td: nth - child(2)),
+            css_selector!(tr:nth-child(9)),
+            css_selector!(td:nth-child(2)),
             css_selector!(strong),
         ];
         let paths_matcher = vec![&path_matcher1];
@@ -236,7 +236,7 @@ mod test_tag_path_html_selector {
         let command_number_matcher = vec![
             css_selector!(#header),
             css_selector!(tbody),
-            css_selector!(tr: nth - child(2)),
+            css_selector!(tr:nth-child(2)),
             css_selector!(td),
             css_selector!(a),
         ];
