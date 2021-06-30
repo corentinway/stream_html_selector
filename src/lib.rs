@@ -1,3 +1,22 @@
+//! This is a parser that read an HTML content in a stream fashion way. While it is reading 
+//! the HTML content it tries to match each CSS requests.
+//!
+//! A CSS request is always made with a array like structure where each element should match a tag 
+//! in the DOM tree. The last element of the "array" is the last element that must be counted or 
+//! returned. CSS request specification are not implemented fully. For example, all relevant parent
+//! (for the matching) must be written.
+//!
+//! A CSS request can be 
+//! - only tag name within a strning slice `"div p"`
+//! - a predicate **TODO say more**
+//! - a CSS selector built with macros
+//!
+//! TODO : CSS request implemented
+//! 
+//! because the HTML content is only read once, we must provide before the reading all requests
+//! where we want a match. All the requests are given within an _array like structure_.
+
+
 pub mod selectors;
 mod tag_iterator;
 mod tag_path;
@@ -66,16 +85,19 @@ pub mod by_tag_path {
     use super::selectors::tag_path_html_selector::TagPathHtmlSelector;
     pub use crate::tag_path::TagPathItem;
 
+    type Predicate = dyn Fn(&TagPathItem) -> bool;
+    type Matcher<'a> = &'a Vec<&'a Vec<Box<Predicate>>>;
+
     pub fn count(
         html: &str,
-        matchers: &Vec<&Vec<Box<dyn Fn(&TagPathItem) -> bool>>>,
+        matchers: Matcher,
     ) -> Vec<usize> {
         let mut html_selector = TagPathHtmlSelector::new();
         html_selector.count(html, matchers)
     }
     pub fn find_first(
         html: &str,
-        matchers: &Vec<&Vec<Box<dyn Fn(&TagPathItem) -> bool>>>,
+        matchers: Matcher,
     ) -> Vec<String> {
         let mut html_selector = TagPathHtmlSelector::new();
         html_selector.find_first(html, matchers)

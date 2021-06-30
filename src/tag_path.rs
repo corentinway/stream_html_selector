@@ -23,8 +23,8 @@ impl std::fmt::Debug for TagPathItem {
 
 #[derive(Debug)]
 pub struct TagPath {
-    path: Vec<Box<TagPathItem>>,
-    last_popped_tag: Option<(Box<TagPathItem>, usize)>, // FIXME : should we have a vector of last popped tag ?
+    path: Vec<TagPathItem>,
+    last_popped_tag: Option<(TagPathItem, usize)>, // FIXME : should we have a vector of last popped tag ?
 }
 
 impl TagPath {
@@ -48,10 +48,10 @@ impl TagPath {
                 if *depth < self.path.len() {
                     1
                 } else {
-                    let last_tag_name = &last_tag_path_item.as_ref().tag.name;
+                    let last_tag_name = &last_tag_path_item.tag.name;
                     if *last_tag_name == tag.name {
                         // index +1
-                        last_tag_path_item.as_ref().nth_child + 1
+                        last_tag_path_item.nth_child + 1
                     } else {
                         1
                     }
@@ -60,10 +60,10 @@ impl TagPath {
             None => 1,
         };
 
-        self.path.push(Box::new(TagPathItem {
+        self.path.push(TagPathItem {
             tag: Box::new(tag),
             nth_child: next_nth_child,
-        }));
+        });
 
         #[cfg(test)]
         println!("\t==> path {:?}", self.path);
@@ -86,7 +86,7 @@ impl TagPath {
     pub fn get_matching_path(&self) -> Vec<&TagPathItem> {
         self.path
             .iter()
-            .map(|boxed_tag| boxed_tag.as_ref())
+            .map(|boxed_tag| boxed_tag)
             .collect()
     }
 }
@@ -286,8 +286,7 @@ mod test_tag_path_nth {
         let tag_path_item = tag_path
             .path
             .get(index)
-            .expect("invalid position of the tag for test")
-            .as_ref();
+            .expect("invalid position of the tag for test");
         assert_eq!(expected_nth_child, tag_path_item.nth_child);
     }
 }
@@ -356,7 +355,7 @@ mod test_tag_path_nth_child {
         let names: Vec<String> = tag_path
             .path
             .iter()
-            .map(|boxed_tag_path_item| boxed_tag_path_item.as_ref())
+            .map(|boxed_tag_path_item| boxed_tag_path_item)
             .map(|tpi| {
                 let name = tpi.tag.as_ref().name.as_str();
                 let nth_child = tpi.nth_child;

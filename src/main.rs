@@ -55,7 +55,7 @@ fn main() {
 
     let founds = find_first(html.as_str(), &matchers);
 
-    println!("Parsing execution time: {} ms", now.elapsed().as_millis());
+    println!("Parsing execution time: {} ms ({} micro-seconds)", now.elapsed().as_millis(), now.elapsed().as_micros());
     println!(
         "Command number {:?} for a total of {:?}\n- item {:?} price {:?}",
         founds.get(0),

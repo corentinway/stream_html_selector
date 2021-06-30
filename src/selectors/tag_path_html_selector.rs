@@ -5,6 +5,9 @@ use crate::tag_path::match_tag_path;
 use crate::tag_path::TagPath;
 use crate::tag_path::TagPathItem;
 
+type Predicate = dyn Fn(&TagPathItem) -> bool;
+type Matcher<'a> = &'a [&'a [Box< Predicate   >]];
+
 pub struct TagPathHtmlSelector {
     path: TagPath,
 }
@@ -19,7 +22,7 @@ impl TagPathHtmlSelector {
     pub fn count(
         &mut self,
         html: &str,
-        matchers: &Vec<&Vec<Box<dyn Fn(&TagPathItem) -> bool>>>,
+        matchers: &Vec<&Vec<Box<Predicate>>>,
     ) -> Vec<usize> {
         let mut counts = vec![0; matchers.len()];
 
@@ -47,7 +50,7 @@ impl TagPathHtmlSelector {
     pub fn find_first(
         &mut self,
         html: &str,
-        matchers: &Vec<&Vec<Box<dyn Fn(&TagPathItem) -> bool>>>,
+        matchers: &Vec<&Vec<Box<Predicate>>>,
     ) -> Vec<String> {
         let mut founds = vec![String::new(); matchers.len()];
         let mut reading_positions = vec![None; matchers.len()];
@@ -99,7 +102,7 @@ impl TagPathHtmlSelector {
     fn update_counts_if_matching(
         &self,
         counts: &mut Vec<usize>,
-        matchers: &Vec<&Vec<Box<dyn Fn(&TagPathItem) -> bool>>>,
+        matchers: &Vec<&Vec<Box<Predicate>>>,
     ) {
         self.check_any_matching(&matchers)
             .into_iter()
@@ -107,7 +110,7 @@ impl TagPathHtmlSelector {
             .for_each(|(index, does_match)| {
                 if does_match {
                     if let Some(value) = counts.get_mut(index) {
-                        *value = *value + 1;
+                        *value += 1;
                     }
                 }
             });
@@ -115,15 +118,15 @@ impl TagPathHtmlSelector {
 
     fn check_any_matching(
         &self,
-        matchers: &Vec<&Vec<Box<dyn Fn(&TagPathItem) -> bool>>>,
+        matchers: &Vec<&Vec<Box<Predicate>>>,
     ) -> Vec<bool> {
         matchers
-            .into_iter()
+            .iter()
             .map(|matcher| self.check_matching(&matcher))
             .collect()
     }
 
-    fn check_matching(&self, first_matcher: &Vec<Box<dyn Fn(&TagPathItem) -> bool>>) -> bool {
+    fn check_matching(&self, first_matcher: &Vec<Box<Predicate>>) -> bool {
         match_tag_path(self.path.get_matching_path(), first_matcher)
     }
 }

@@ -23,8 +23,8 @@ where
         let matcher = &matchers[0];
 
         let tag_iterator = TagIterator::new(html);
-        tag_iterator.for_each(|element| match element {
-            Elements::Start(tag, _begin, _end) => {
+        tag_iterator.for_each(|element| 
+            if let Elements::Start(tag, _begin, _end) = element {
                 let tag_path_item = TagPathItem {
                     tag: Box::new(tag),
                     nth_child: 0, //FIXME
@@ -33,8 +33,7 @@ where
                     count += 1;
                 }
             }
-            _ => {}
-        });
+        );
 
         vec![count]
     }
