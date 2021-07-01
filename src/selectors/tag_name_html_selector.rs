@@ -53,7 +53,7 @@ impl TagNameHtmlSelector {
     }
 
     fn increase_path(&mut self, tag: Tag) {
-        self.tag_name_path.push(tag.name.clone()); // FIXME
+        self.tag_name_path.push(tag.name);
         self.tag_name_path_string = self.tag_name_path.join(" ");
     }
 }

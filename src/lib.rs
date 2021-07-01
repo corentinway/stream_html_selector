@@ -92,14 +92,14 @@ pub mod by_tag_path {
         html: &str,
         matchers: Matcher,
     ) -> Vec<usize> {
-        let mut html_selector = TagPathHtmlSelector::new();
+        let mut html_selector = TagPathHtmlSelector::default();
         html_selector.count(html, matchers)
     }
     pub fn find_first(
         html: &str,
         matchers: Matcher,
     ) -> Vec<String> {
-        let mut html_selector = TagPathHtmlSelector::new();
+        let mut html_selector = TagPathHtmlSelector::default();
         html_selector.find_first(html, matchers)
     }
 }

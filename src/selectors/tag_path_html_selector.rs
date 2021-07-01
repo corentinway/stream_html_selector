@@ -6,14 +6,19 @@ use crate::tag_path::TagPath;
 use crate::tag_path::TagPathItem;
 
 type Predicate = dyn Fn(&TagPathItem) -> bool;
-type Matcher<'a> = &'a [&'a [Box< Predicate   >]];
 
 pub struct TagPathHtmlSelector {
     path: TagPath,
 }
 
+impl Default for TagPathHtmlSelector {
+    fn default() -> Self {
+        TagPathHtmlSelector::new()
+    }
+}
+
 impl TagPathHtmlSelector {
-    pub fn new() -> Self {
+    fn new() -> Self {
         TagPathHtmlSelector {
             path: TagPath::new(),
         }
@@ -22,7 +27,7 @@ impl TagPathHtmlSelector {
     pub fn count(
         &mut self,
         html: &str,
-        matchers: &Vec<&Vec<Box<Predicate>>>,
+        matchers: &[&Vec<Box<Predicate>>],
     ) -> Vec<usize> {
         let mut counts = vec![0; matchers.len()];
 
@@ -50,7 +55,7 @@ impl TagPathHtmlSelector {
     pub fn find_first(
         &mut self,
         html: &str,
-        matchers: &Vec<&Vec<Box<Predicate>>>,
+        matchers: &[&Vec<Box<Predicate>>],
     ) -> Vec<String> {
         let mut founds = vec![String::new(); matchers.len()];
         let mut reading_positions = vec![None; matchers.len()];
@@ -73,8 +78,8 @@ impl TagPathHtmlSelector {
                     self.path.reduce();
                 }
             }
+            #[cfg(test)]
             Elements::Text(content) => {
-                #[cfg(test)]
                 println!("\t\t CONTENT : {:?}", content);
             }
             Elements::End(_tag_name, begin, _end) => {
@@ -102,7 +107,7 @@ impl TagPathHtmlSelector {
     fn update_counts_if_matching(
         &self,
         counts: &mut Vec<usize>,
-        matchers: &Vec<&Vec<Box<Predicate>>>,
+        matchers: &[&Vec<Box<Predicate>>],
     ) {
         self.check_any_matching(&matchers)
             .into_iter()
@@ -118,7 +123,7 @@ impl TagPathHtmlSelector {
 
     fn check_any_matching(
         &self,
-        matchers: &Vec<   &Vec<Box<Predicate>>>,
+        matchers: &[&Vec<Box<Predicate>>],
     ) -> Vec<bool> {
         matchers
             .iter()
