@@ -10,15 +10,21 @@ pub struct TagNameHtmlSelector {
     tag_name_path_string: String,
 }
 
+impl Default for TagNameHtmlSelector {
+    fn default() -> Self {
+        TagNameHtmlSelector::new()
+    }
+}
+
 impl TagNameHtmlSelector {
-    pub fn new() -> Self {
+    fn new() -> Self {
         TagNameHtmlSelector {
             tag_name_path: Vec::new(),
             tag_name_path_string: String::new(),
         }
     }
 
-    fn search_for_css(&self, css_requests: &Vec<String>, counts: &mut Vec<usize>) {
+    fn search_for_css(&self, css_requests: &[String], counts: &mut Vec<usize>) {
         css_requests
             .iter()
             .enumerate()
@@ -29,7 +35,7 @@ impl TagNameHtmlSelector {
             });
     }
 
-    fn does_match_css_request(&self, css_requests: &Vec<String>) -> Option<usize> {
+    fn does_match_css_request(&self, css_requests:  &[String]) -> Option<usize> {
         let a = css_requests
             .iter()
             .enumerate()
@@ -46,8 +52,8 @@ impl TagNameHtmlSelector {
         self.tag_name_path_string = self.tag_name_path.join(" ");
     }
 
-    fn increase_path(&mut self, tag: Box<Tag>) {
-        self.tag_name_path.push(tag.name.clone()); // FIXME
+    fn increase_path(&mut self, tag: Tag) {
+        self.tag_name_path.push(tag.name);
         self.tag_name_path_string = self.tag_name_path.join(" ");
     }
 }
@@ -64,7 +70,7 @@ impl HtmlSelectorCounter<&str> for TagNameHtmlSelector {
             match element {
                 Elements::Start(tag, _begin, _end) => {
                     let is_autoclosing = tag.is_autoclosing;
-                    self.increase_path(Box::new(tag));
+                    self.increase_path(tag);
                     self.search_for_css(&css_requests, &mut counts);
                     if is_autoclosing {
                         self.reduce_path();
@@ -94,7 +100,7 @@ impl HtmlSelectorFindFirst<&str> for TagNameHtmlSelector {
         for element in tag_iterator {
             match element {
                 Elements::Start(tag, _begin, end) => {
-                    self.increase_path(Box::new(tag));
+                    self.increase_path(tag);
                     if let Some(_index) = self.does_match_css_request(&css_requests) {
                         // get begin and end position of the tag in the
                         // then, if the next decrease the path with the ending tag,

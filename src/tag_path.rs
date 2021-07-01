@@ -23,8 +23,8 @@ impl std::fmt::Debug for TagPathItem {
 
 #[derive(Debug)]
 pub struct TagPath {
-    path: Vec<Box<TagPathItem>>,
-    last_popped_tag: Option<(Box<TagPathItem>, usize)>, // FIXME : should we have a vector of last popped tag ?
+    path: Vec<TagPathItem>,
+    last_popped_tag: Option<(TagPathItem, usize)>, // FIXME : should we have a vector of last popped tag ?
 }
 
 impl TagPath {
@@ -35,7 +35,11 @@ impl TagPath {
         }
     }
     pub fn add(&mut self, tag: Tag) {
-        //println!("ADD - {:?} - new tag {:?} - last popped {:?}", self.path, tag, self.last_popped_tag);
+        #[cfg(test)]
+        println!(
+            "\nADD - {:?}\n\t- new tag {:?}\n\t- last popped {:?}",
+            self.path, tag, self.last_popped_tag
+        );
 
         let next_nth_child = match self.last_popped_tag.borrow() {
             Some((last_tag_path_item, depth)) => {
@@ -44,10 +48,10 @@ impl TagPath {
                 if *depth < self.path.len() {
                     1
                 } else {
-                    let last_tag_name = &last_tag_path_item.as_ref().tag.name;
+                    let last_tag_name = &last_tag_path_item.tag.name;
                     if *last_tag_name == tag.name {
                         // index +1
-                        last_tag_path_item.as_ref().nth_child + 1
+                        last_tag_path_item.nth_child + 1
                     } else {
                         1
                     }
@@ -56,21 +60,32 @@ impl TagPath {
             None => 1,
         };
 
-        self.path.push(Box::new(TagPathItem {
+        self.path.push(TagPathItem {
             tag: Box::new(tag),
             nth_child: next_nth_child,
-        }));
+        });
+
+        #[cfg(test)]
+        println!("\t==> path {:?}", self.path);
     }
     pub fn reduce(&mut self) {
+        #[cfg(test)]
+        println!(
+            "\nREDUCEing - {:?}\n\t- popped tag {:?}",
+            self.path, self.last_popped_tag
+        );
         let len = self.path.len();
         self.last_popped_tag = self.path.pop().map(|t| (t, len));
-        //println!("REDUCE - {:?} - new tag {:?}", self.path, self.last_popped_tag);
+        #[cfg(test)]
+        println!(
+            "\t==>- {:?}\n\t- popped tag {:?}",
+            self.path, self.last_popped_tag
+        );
     }
 
     pub fn get_matching_path(&self) -> Vec<&TagPathItem> {
         self.path
             .iter()
-            .map(|boxed_tag| boxed_tag.as_ref())
             .collect()
     }
 }
@@ -79,7 +94,7 @@ impl TagPath {
 /// - tag_path is a vector where each element match an HTML tag. Each element indexed N has its parent at index N-1
 /// - css_selector is a vector of predicate. Each element of the vector will match one tag at a given index of the tag_path.
 /// This is a recursive algorithm where it tries to match the last element of the tag_path and go backwards to its parent.
-pub fn match_tag_path<F>(tag_path: Vec<&TagPathItem>, css_selector: &Vec<F>) -> bool
+pub fn match_tag_path<F>(tag_path: Vec<&TagPathItem>, css_selector: &[F]) -> bool
 where
     F: Fn(&TagPathItem) -> bool,
 {
@@ -96,7 +111,7 @@ where
 fn match_tag_path_index<F>(
     tag_path: Vec<&TagPathItem>,
     tag_index: usize,
-    css_selector: &Vec<F>,
+    css_selector: &[F],
     selector_index: usize,
 ) -> bool
 where
@@ -270,8 +285,7 @@ mod test_tag_path_nth {
         let tag_path_item = tag_path
             .path
             .get(index)
-            .expect("invalid position of the tag for test")
-            .as_ref();
+            .expect("invalid position of the tag for test");
         assert_eq!(expected_nth_child, tag_path_item.nth_child);
     }
 }
@@ -340,7 +354,7 @@ mod test_tag_path_nth_child {
         let names: Vec<String> = tag_path
             .path
             .iter()
-            .map(|boxed_tag_path_item| boxed_tag_path_item.as_ref())
+            .map(|boxed_tag_path_item| boxed_tag_path_item)
             .map(|tpi| {
                 let name = tpi.tag.as_ref().name.as_str();
                 let nth_child = tpi.nth_child;

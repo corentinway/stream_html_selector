@@ -95,7 +95,7 @@ pub fn and_predicate(
     Box::new(move |tag_path_item: &TagPathItem| {
         predicates
             .iter()
-            .fold(true, |acc, predicate| acc && predicate(&tag_path_item))
+            .all(|predicate| predicate(&tag_path_item))
     })
 }
 
