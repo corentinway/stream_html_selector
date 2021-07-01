@@ -8,7 +8,7 @@ pub trait HtmlSelectorCounter<T> {
     fn count(&mut self, html: &str, css_requests: &[T]) -> Vec<usize>;
 }
 pub trait HtmlSelectorFindFirst<T> {
-    fn find_first(&mut self, html: &str, css_requests: &[T]) -> String;
+    fn find_first(&mut self, html: &str, css_requests: &[T]) -> Vec<String>;
 }
 
 pub fn format_css_request(css_requests: &[&str]) -> Vec<String> {
