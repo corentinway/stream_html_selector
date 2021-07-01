@@ -24,6 +24,43 @@ pub fn format_css_request(css_requests: &[&str]) -> Vec<String> {
         .collect()
 }
 
+pub struct FindFirstTextStore {
+    reading_positions: Vec<Option<usize>>
+}
+impl FindFirstTextStore { // FIXME test it
+    fn new(capacity: usize) -> Self {
+        FindFirstTextStore {
+            reading_positions: vec![None; capacity],
+        }
+    }
+    pub fn store_starting_position(&mut self, matcher_index: usize, content_start_index: usize) {
+        if let Some(position) = self.reading_positions.get_mut(matcher_index) {
+            *position = Some(content_start_index);
+        }
+    }
+
+    pub fn update_content(&self, founds: &mut Vec<String>, content_end_index: usize, html: &str) {
+        
+        for position in self.reading_positions.iter().enumerate() {
+            if let (index, Some(start_text)) = position {
+                let content = html.get(*start_text..content_end_index);
+                if let Some(content) = content {
+                    if let Some(value) = founds.get_mut(index) {
+                        // fill the content only if it was not filled before
+                        if value.is_empty() {
+                            value.push_str(content);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    
+}
+
+
+
 #[cfg(test)]
 mod test_selectors {
     use super::*;

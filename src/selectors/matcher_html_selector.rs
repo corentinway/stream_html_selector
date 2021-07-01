@@ -54,7 +54,7 @@ where
     fn find_first(&mut self, html: &str, matchers: &[F]) -> Vec<String> {
         
         let mut founds = vec![String::new(); matchers.len()];
-        let mut reading_positions = vec![None; matchers.len()];
+        let mut text_store = super::FindFirstTextStore::new(matchers.len());
 
         let tag_iterator = TagIterator::new(html);
         for element in tag_iterator {
@@ -68,27 +68,12 @@ where
                         .enumerate()
                         .for_each(|(index, predicate)| {
                             if predicate(&tag_path_item) {
-                                if let Some(position) = reading_positions.get_mut(index) {
-                                    *position = Some(end);
-                                }
+                                text_store.store_starting_position(index, end);
                             }
                         })
                 }
                 Elements::End(_name, begin, _end) => {
-                    
-                    for position in reading_positions.iter().enumerate() {
-                        if let (index, Some(start_text)) = position {
-                            let content = html.get(*start_text..begin);
-                            if let Some(content) = content {
-                                if let Some(value) = founds.get_mut(index) {
-                                    // fill the content only if it was not filled before
-                                    if value.is_empty() {
-                                        value.push_str(content);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    text_store.update_content(&mut founds, begin, html);
                 }
                 _ => {}
             }

@@ -65,7 +65,6 @@ impl HtmlSelectorCounter<&str> for TagNameHtmlSelector {
 
         let tag_iterator = TagIterator::new(html);
         tag_iterator.for_each(|element| {
-            //println!("PATH : {:?}", self.tag_path);
 
             match element {
                 Elements::Start(tag, _begin, _end) => {
@@ -79,8 +78,6 @@ impl HtmlSelectorCounter<&str> for TagNameHtmlSelector {
                 Elements::End(_, _, _) => {
                     self.reduce_path();
                 }
-                //Elements::Comment(tag) => {},
-                //Elements::Text(tag) => {},
                 _ => {}
             }
         });
@@ -92,8 +89,11 @@ impl HtmlSelectorCounter<&str> for TagNameHtmlSelector {
 impl HtmlSelectorFindFirst<&str> for TagNameHtmlSelector {
     fn find_first(&mut self, html: &str, css_requests: &[&str]) -> Vec<String> {
         let css_requests = format_css_request(css_requests);
+        
         let mut founds = vec![String::new(); css_requests.len()];
-        let mut reading_positions = vec![None; css_requests.len()];
+
+        let mut text_store = super::FindFirstTextStore::new(css_requests.len());
+        
 
         let tag_iterator = TagIterator::new(html);
 
@@ -106,9 +106,7 @@ impl HtmlSelectorFindFirst<&str> for TagNameHtmlSelector {
                         // get begin and end position of the tag in the
                         // then, if the next decrease the path with the ending tag,
                         // so we have all tag position
-                        if let Some(position) = reading_positions.get_mut(index) {
-                            *position = Some(end);
-                        }
+                        text_store.store_starting_position(index, end);
                     }
                     if is_autoclosing_tag {
                         self.reduce_path();
@@ -116,19 +114,7 @@ impl HtmlSelectorFindFirst<&str> for TagNameHtmlSelector {
                 }
                 Elements::End(_, begin, _end) => {
                     self.reduce_path();
-                    for position in reading_positions.iter().enumerate() {
-                        if let (index, Some(start_text)) = position {
-                            let content = html.get(*start_text..begin);
-                            if let Some(content) = content {
-                                if let Some(value) = founds.get_mut(index) {
-                                    // fill the content only if it was not filled before
-                                    if value.is_empty() {
-                                        value.push_str(content);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    text_store.update_content(&mut founds, begin, html);
 
                 }
                 _ => {}
