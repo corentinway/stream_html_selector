@@ -51,10 +51,10 @@ impl<F> HtmlSelectorFindFirst<F> for MatcherHtmlSelector
 where
     F: Fn(&TagPathItem) -> bool,
 {
-    fn find_first(&mut self, html: &str, matchers: &[F]) -> String {
-        let mut text = String::new();
-        let mut reading_position = None;
-        let matcher = &matchers[0];
+    fn find_first(&mut self, html: &str, matchers: &[F]) -> Vec<String> {
+        
+        let mut founds = vec![String::new(); matchers.len()];
+        let mut text_store = super::FindFirstTextStore::new(matchers.len());
 
         let tag_iterator = TagIterator::new(html);
         for element in tag_iterator {
@@ -62,26 +62,24 @@ where
                 Elements::Start(tag, _begin, end) => {
                     let tag_path_item = TagPathItem {
                         tag: Box::new(tag),
-                        nth_child: 0, // FIXME
+                        nth_child: 0, // FIXME don't need.
                     };
-                    if matcher(&tag_path_item) {
-                        reading_position = Some(end);
-                    }
+                    matchers.iter()
+                        .enumerate()
+                        .for_each(|(index, predicate)| {
+                            if predicate(&tag_path_item) {
+                                text_store.store_starting_position(index, end);
+                            }
+                        })
                 }
                 Elements::End(_name, begin, _end) => {
-                    if let Some(position) = reading_position {
-                        let content = html.get(position..begin);
-                        if let Some(content) = content {
-                            text.push_str(content);
-                            break;
-                        }
-                    }
+                    text_store.update_content(&mut founds, begin, html);
                 }
                 _ => {}
             }
         }
 
-        text
+        founds
     }
 }
 
@@ -130,8 +128,8 @@ mod test_matcher_selector {
         let id_matcher = css_selector!(#head);
         let mut html_selector = MatcherHtmlSelector::new();
 
-        let text = html_selector.find_first(html, &[id_matcher]);
+        let founds = html_selector.find_first(html, &[id_matcher]);
 
-        assert_eq!("foo".to_string(), text);
+        assert_eq!(vec!["foo".to_string()], founds);
     }
 }

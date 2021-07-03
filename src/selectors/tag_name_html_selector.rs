@@ -65,7 +65,6 @@ impl HtmlSelectorCounter<&str> for TagNameHtmlSelector {
 
         let tag_iterator = TagIterator::new(html);
         tag_iterator.for_each(|element| {
-            //println!("PATH : {:?}", self.tag_path);
 
             match element {
                 Elements::Start(tag, _begin, _end) => {
@@ -79,8 +78,6 @@ impl HtmlSelectorCounter<&str> for TagNameHtmlSelector {
                 Elements::End(_, _, _) => {
                     self.reduce_path();
                 }
-                //Elements::Comment(tag) => {},
-                //Elements::Text(tag) => {},
                 _ => {}
             }
         });
@@ -90,39 +87,41 @@ impl HtmlSelectorCounter<&str> for TagNameHtmlSelector {
 }
 
 impl HtmlSelectorFindFirst<&str> for TagNameHtmlSelector {
-    fn find_first(&mut self, html: &str, css_requests: &[&str]) -> String {
+    fn find_first(&mut self, html: &str, css_requests: &[&str]) -> Vec<String> {
         let css_requests = format_css_request(css_requests);
-        let mut text = String::new();
-        let mut find_first_position = None;
+        
+        let mut founds = vec![String::new(); css_requests.len()];
+
+        let mut text_store = super::FindFirstTextStore::new(css_requests.len());
+        
 
         let tag_iterator = TagIterator::new(html);
 
         for element in tag_iterator {
             match element {
                 Elements::Start(tag, _begin, end) => {
+                    let is_autoclosing_tag = tag.is_autoclosing;
                     self.increase_path(tag);
-                    if let Some(_index) = self.does_match_css_request(&css_requests) {
+                    if let Some(index) = self.does_match_css_request(&css_requests) {
                         // get begin and end position of the tag in the
                         // then, if the next decrease the path with the ending tag,
                         // so we have all tag position
-                        find_first_position = Some(end);
+                        text_store.store_starting_position(index, end);
+                    }
+                    if is_autoclosing_tag {
+                        self.reduce_path();
                     }
                 }
                 Elements::End(_, begin, _end) => {
-                    if let Some(position) = find_first_position {
-                        let content = html.get(position..begin);
-                        if let Some(content) = content {
-                            text.push_str(content);
-                            break;
-                        }
-                    }
                     self.reduce_path();
+                    text_store.update_content(&mut founds, begin, html);
+
                 }
                 _ => {}
             }
         }
 
-        text
+        founds
     }
 }
 
@@ -222,8 +221,8 @@ mod tests {
 
         let mut html_selector = TagNameHtmlSelector::new();
 
-        let texts = html_selector.find_first(&html, &css_requests);
+        let founds = html_selector.find_first(&html, &css_requests);
 
-        assert_eq!(texts, "foo".to_string());
+        assert_eq!(founds, vec!["foo".to_string()]);
     }
 }

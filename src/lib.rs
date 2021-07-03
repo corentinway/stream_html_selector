@@ -45,7 +45,7 @@ pub mod by_name {
     /// TODO : MUST return a Vec<String>
     /// - `html` is an HTML code
     /// - `css_requests` contains a list of CSS selectors. **One CSS Selector** is a list of tag name within a `Vec<&str>` struct.
-    pub fn find_first(html: &str, css_requests: &[&str]) -> String {
+    pub fn find_first(html: &str, css_requests: &[&str]) -> Vec<String> {
         let mut html_selector = TagNameHtmlSelector::default();
         html_selector.find_first(html, css_requests)
     }
@@ -72,7 +72,7 @@ pub mod with_matcher {
     /// TODO : MUST return a Vec<String>
     /// - `html` is an HTML code
     /// - `css_requests` contains a list of CSS selectors. **One CSS Selector** is a list of tag name within a `Vec<&str>` struct.
-    pub fn find_first<F>(html: &str, css_requests: &[F]) -> String
+    pub fn find_first<F>(html: &str, css_requests: &[F]) -> Vec<String>
     where
         F: Fn(&TagPathItem) -> bool,
     {
