@@ -48,7 +48,7 @@ impl FindFirstTextStore { // FIXME test it
                     if let Some(value) = founds.get_mut(index) {
                         // fill the content only if it was not filled before
                         if value.is_empty() {
-                            value.push_str(content);
+                            value.push_str(content.to_string().replace("\n", " ").as_str());
                         }
                     }
                 }
