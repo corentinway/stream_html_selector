@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate lazy_static;
+
 use stream_html_selector::by_tag_path::find_first;
 
 use std::fs;
@@ -14,7 +17,7 @@ fn main() {
     let command_number_matcher = vec![
         css_selector!(#header),
         css_selector!(tbody),
-        css_selector!(tr:nth-child(2)),
+        css_selector!(tr: nth - child(2)),
         css_selector!(td),
         css_selector!(a),
     ];
@@ -22,8 +25,8 @@ fn main() {
     let total_matcher = vec![
         css_selector!(#costBreakdown),
         css_selector!(tbody),
-        css_selector!(tr:nth-child(9)),
-        css_selector!(td:nth-child(2)),
+        css_selector!(tr: nth - child(9)),
+        css_selector!(td: nth - child(2)),
         css_selector!(strong),
     ];
 
@@ -33,9 +36,9 @@ fn main() {
         css_selector!(tbody),
         css_selector!(tr),
         css_selector!(td.name),
-        css_selector!(a:nth-child(1)),
+        css_selector!(a: nth - child(1)),
     ];
-    
+
     // #itemDetails > tbody > tr > td.price > strong
     let amount_item_1 = vec![
         css_selector!(#itemDetails),
@@ -44,18 +47,21 @@ fn main() {
         css_selector!(td.price),
         css_selector!(strong),
     ];
-    
 
     let matchers = vec![
-        &command_number_matcher, 
+        &command_number_matcher,
         &total_matcher,
-        &label_item_1  ,  
-        &amount_item_1  ,  
+        &label_item_1,
+        &amount_item_1,
     ];
 
     let founds = find_first(html.as_str(), &matchers);
 
-    println!("Parsing execution time: {} ms ({} micro-seconds)", now.elapsed().as_millis(), now.elapsed().as_micros());
+    println!(
+        "Parsing execution time: {} ms ({} micro-seconds)",
+        now.elapsed().as_millis(),
+        now.elapsed().as_micros()
+    );
     println!(
         "Command number {:?} for a total of {:?}\n- item {:?} price {:?}",
         founds.get(0),

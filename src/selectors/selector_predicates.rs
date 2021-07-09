@@ -93,9 +93,7 @@ pub fn and_predicate(
     predicates: Vec<Box<dyn Fn(&TagPathItem) -> bool>>,
 ) -> Box<dyn Fn(&TagPathItem) -> bool> {
     Box::new(move |tag_path_item: &TagPathItem| {
-        predicates
-            .iter()
-            .all(|predicate| predicate(&tag_path_item))
+        predicates.iter().all(|predicate| predicate(&tag_path_item))
     })
 }
 

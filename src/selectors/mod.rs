@@ -25,9 +25,10 @@ pub fn format_css_request(css_requests: &[&str]) -> Vec<String> {
 }
 
 pub struct FindFirstTextStore {
-    reading_positions: Vec<Option<usize>>
+    reading_positions: Vec<Option<usize>>,
 }
-impl FindFirstTextStore { // FIXME test it
+impl FindFirstTextStore {
+    // FIXME test it
     fn new(capacity: usize) -> Self {
         FindFirstTextStore {
             reading_positions: vec![None; capacity],
@@ -40,7 +41,6 @@ impl FindFirstTextStore { // FIXME test it
     }
 
     pub fn update_content(&self, founds: &mut Vec<String>, content_end_index: usize, html: &str) {
-        
         for position in self.reading_positions.iter().enumerate() {
             if let (index, Some(start_text)) = position {
                 let content = html.get(*start_text..content_end_index);
@@ -55,11 +55,7 @@ impl FindFirstTextStore { // FIXME test it
             }
         }
     }
-
-    
 }
-
-
 
 #[cfg(test)]
 mod test_selectors {

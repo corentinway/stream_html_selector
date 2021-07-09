@@ -28,7 +28,7 @@ where
         let matcher = &matchers[0];
 
         let tag_iterator = TagIterator::new(html);
-        tag_iterator.for_each(|element| 
+        tag_iterator.for_each(|element| {
             if let Elements::Start(tag, _begin, _end) = element {
                 let tag_path_item = TagPathItem {
                     tag: Box::new(tag),
@@ -38,7 +38,7 @@ where
                     count += 1;
                 }
             }
-        );
+        });
 
         vec![count]
     }
@@ -52,7 +52,6 @@ where
     F: Fn(&TagPathItem) -> bool,
 {
     fn find_first(&mut self, html: &str, matchers: &[F]) -> Vec<String> {
-        
         let mut founds = vec![String::new(); matchers.len()];
         let mut text_store = super::FindFirstTextStore::new(matchers.len());
 
@@ -64,13 +63,11 @@ where
                         tag: Box::new(tag),
                         nth_child: 0, // FIXME don't need.
                     };
-                    matchers.iter()
-                        .enumerate()
-                        .for_each(|(index, predicate)| {
-                            if predicate(&tag_path_item) {
-                                text_store.store_starting_position(index, end);
-                            }
-                        })
+                    matchers.iter().enumerate().for_each(|(index, predicate)| {
+                        if predicate(&tag_path_item) {
+                            text_store.store_starting_position(index, end);
+                        }
+                    })
                 }
                 Elements::End(_name, begin, _end) => {
                     text_store.update_content(&mut founds, begin, html);

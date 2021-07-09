@@ -84,9 +84,7 @@ impl TagPath {
     }
 
     pub fn get_matching_path(&self) -> Vec<&TagPathItem> {
-        self.path
-            .iter()
-            .collect()
+        self.path.iter().collect()
     }
 }
 

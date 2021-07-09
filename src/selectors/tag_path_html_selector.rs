@@ -24,11 +24,7 @@ impl TagPathHtmlSelector {
         }
     }
 
-    pub fn count(
-        &mut self,
-        html: &str,
-        matchers: &[&Vec<Box<Predicate>>],
-    ) -> Vec<usize> {
+    pub fn count(&mut self, html: &str, matchers: &[&Vec<Box<Predicate>>]) -> Vec<usize> {
         let mut counts = vec![0; matchers.len()];
 
         let tag_iterator = TagIterator::new(html);
@@ -52,12 +48,7 @@ impl TagPathHtmlSelector {
         counts
     }
 
-    pub fn find_first(
-        &mut self,
-        html: &str,
-        matchers: &[&Vec<Box<Predicate>>],
-    ) -> Vec<String> {
-        
+    pub fn find_first(&mut self, html: &str, matchers: &[&Vec<Box<Predicate>>]) -> Vec<String> {
         let mut founds = vec![String::new(); matchers.len()];
 
         let mut text_store = super::FindFirstTextStore::new(matchers.len());
@@ -110,10 +101,7 @@ impl TagPathHtmlSelector {
             });
     }
 
-    fn check_any_matching(
-        &self,
-        matchers: &[&Vec<Box<Predicate>>],
-    ) -> Vec<bool> {
+    fn check_any_matching(&self, matchers: &[&Vec<Box<Predicate>>]) -> Vec<bool> {
         matchers
             .iter()
             .map(|matcher| self.check_matching(&matcher))
@@ -178,14 +166,14 @@ mod test_tag_path_html_selector {
         let total_label_matcher = vec![
             css_selector!(table),
             css_selector!(tbody),
-            css_selector!(tr:nth-child(4)),
-            css_selector!(td:nth-child(1)),
+            css_selector!(tr: nth - child(4)),
+            css_selector!(td: nth - child(1)),
         ];
         let total_amount_matcher = vec![
             css_selector!(table),
             css_selector!(tbody),
-            css_selector!(tr:nth-child(4)),
-            css_selector!(td:nth-child(3)),
+            css_selector!(tr: nth - child(4)),
+            css_selector!(td: nth - child(3)),
         ];
         let paths_matcher = vec![&total_label_matcher, &total_amount_matcher];
         // WHEN
@@ -207,8 +195,8 @@ mod test_tag_path_html_selector {
         let path_matcher1 = vec![
             css_selector!(#costBreakdown),
             css_selector!(tbody),
-            css_selector!(tr:nth-child(9)),
-            css_selector!(td:nth-child(2)),
+            css_selector!(tr: nth - child(9)),
+            css_selector!(td: nth - child(2)),
             css_selector!(strong),
         ];
         let paths_matcher = vec![&path_matcher1];
@@ -233,7 +221,7 @@ mod test_tag_path_html_selector {
         let command_number_matcher = vec![
             css_selector!(#header),
             css_selector!(tbody),
-            css_selector!(tr:nth-child(2)),
+            css_selector!(tr: nth - child(2)),
             css_selector!(td),
             css_selector!(a),
         ];

@@ -35,7 +35,7 @@ impl TagNameHtmlSelector {
             });
     }
 
-    fn does_match_css_request(&self, css_requests:  &[String]) -> Option<usize> {
+    fn does_match_css_request(&self, css_requests: &[String]) -> Option<usize> {
         let a = css_requests
             .iter()
             .enumerate()
@@ -64,22 +64,19 @@ impl HtmlSelectorCounter<&str> for TagNameHtmlSelector {
         let mut counts = vec![0; css_requests.len()];
 
         let tag_iterator = TagIterator::new(html);
-        tag_iterator.for_each(|element| {
-
-            match element {
-                Elements::Start(tag, _begin, _end) => {
-                    let is_autoclosing = tag.is_autoclosing;
-                    self.increase_path(tag);
-                    self.search_for_css(&css_requests, &mut counts);
-                    if is_autoclosing {
-                        self.reduce_path();
-                    }
-                }
-                Elements::End(_, _, _) => {
+        tag_iterator.for_each(|element| match element {
+            Elements::Start(tag, _begin, _end) => {
+                let is_autoclosing = tag.is_autoclosing;
+                self.increase_path(tag);
+                self.search_for_css(&css_requests, &mut counts);
+                if is_autoclosing {
                     self.reduce_path();
                 }
-                _ => {}
             }
+            Elements::End(_, _, _) => {
+                self.reduce_path();
+            }
+            _ => {}
         });
 
         counts
@@ -89,11 +86,10 @@ impl HtmlSelectorCounter<&str> for TagNameHtmlSelector {
 impl HtmlSelectorFindFirst<&str> for TagNameHtmlSelector {
     fn find_first(&mut self, html: &str, css_requests: &[&str]) -> Vec<String> {
         let css_requests = format_css_request(css_requests);
-        
+
         let mut founds = vec![String::new(); css_requests.len()];
 
         let mut text_store = super::FindFirstTextStore::new(css_requests.len());
-        
 
         let tag_iterator = TagIterator::new(html);
 
@@ -115,7 +111,6 @@ impl HtmlSelectorFindFirst<&str> for TagNameHtmlSelector {
                 Elements::End(_, begin, _end) => {
                     self.reduce_path();
                     text_store.update_content(&mut founds, begin, html);
-
                 }
                 _ => {}
             }
