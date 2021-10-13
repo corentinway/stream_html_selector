@@ -23,7 +23,7 @@ pub mod tag_iterator;
 mod tag_path;
 
 pub mod elements; // FIXME visibility
-mod html_special_chars;
+mod special_chars;
 
 /// this will search into html based on tag name only.
 // a query is a Vec<&str> where each element is a tag name to match.
